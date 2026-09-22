@@ -1,6 +1,6 @@
-# hive-base — plan for One Hive R1 + R2, and 1-hive's operating loop
+# hive-record — plan for One Hive R1 + R2, and 1-hive's operating loop
 
-**Status:** agreed plan · 2026-09-23 · rev 4 (triage agent; AgentsView trial)
+**Status:** agreed plan · 2026-09-23 · rev 5 (core + profiles; repo split; renamed to hive-record)
 **Scope:** R1 (the record) and R2 (legality table and review-gated close) from the *One Hive incremental release plan*, then a minimal operating loop so that our own hive, **1-hive**, actually runs. 1-hive's first workload is `mtg-player` (`~/repos/hive-workspace.git`); more follow.
 **Sources, newest-governing first:** the incremental release plan; *One Hive roadmap*, Ben's revision; *roadmap differences* (Aug 31); Cassio's original roadmap; *OmegaHive: A Running Hive* (Jul 29), used as the technical reference for record semantics; the frozen R0 spec and `hivepin` 1.0.0 (Sep 8); and `~/cassio-hive`, a running implementation that we mine for lessons.
 
@@ -22,7 +22,10 @@ On top of that, 1-hive runs a small operating loop (Phase E):
 - **Supervisor.** A mechanical program keeps tasks moving: it nudges, restarts with context rebuilt from the record, reassigns and escalates.
 - **What reaches the human.** Only important things, chosen by fixed rules, not by agents.
 
-The record's v1 schema covers goals, proposals, leases and supervisor events from day one, because the schema is what we freeze.
+The record is **modular, like R0**:
+- The **core profile** holds only what the One Hive roadmap agreed. Any existing hive can adopt it alone: first in mirror mode, then authoritative.
+- 1-hive's operating model is the **`1-hive` profile**, an extension that may only add or tighten, never loosen.
+- Each Phase E piece is its own repo, talking to the record over HTTP.
 
 ---
 
@@ -81,7 +84,7 @@ Out of scope for R1/R2 themselves: scheduling, dashboards, dependencies and prio
 
 ## 3. Design decisions
 
-**Agreed so far (2026-09-23):** gateway as a service (D1); mirror mode built, adapter deferred (D4); approvals at goal level (D12); budgets in any of three units (D12); reviewer ≠ author is enough for v1 (D3); supervisor defaults and triage agent (D14); a single front agent that starts as a Claude Code session (D15); Phase E is in scope; repeated failures interrupt the human; naming (D11).
+**Agreed so far (2026-09-23):** gateway as a service (D1); mirror mode built, adapter deferred (D4); approvals at goal level (D12); budgets in any of three units (D12); reviewer ≠ author is enough for v1 (D3); supervisor defaults and triage agent (D14); a single front agent that starts as a Claude Code session (D15); Phase E is in scope; repeated failures interrupt the human; naming (D11); core + profiles and the repo split (D16).
 
 **D1. The gateway is a narrow service with sole write access to the database.** It speaks HTTP/JSON over a Unix socket or loopback/tailnet. It authenticates callers with per-actor bearer credentials and **derives actor and class from the credential**. This makes "nothing writes around the gateway" and "authorized actor" (clause 6) real, and it lets non-Python and sandboxed clients take part without database credentials.
 
@@ -111,7 +114,7 @@ Out of scope for R1/R2 themselves: scheduling, dashboards, dependencies and prio
 
 **D10. The read surface is part of R1:** cursor reads, subscription (SSE), the board at any position, task history, goal status, the human's **inbox**, and the run list. The CLI is a thin client. The fold also runs standalone over an exported log.
 
-**D11. Stack and naming.** Python ≥3.11, Postgres, `hivepin`, `psycopg`, `jsonschema`, and a small HTTP layer. Package `hivebase`, CLI `hive`, repository `github.com/1-hive/hive-base`. Packaged like `hivepin` (hatchling, ruff, pytest, GPL-3.0-or-later). Rootless Podman on this host.
+**D11. Stack and naming.** Python ≥3.11, Postgres, `hivepin`, `psycopg`, `jsonschema`, and a small HTTP layer. Package `hiverecord`, CLI `hive`, repository `github.com/1-hive/hive-record`. Packaged like `hivepin` (hatchling, ruff, pytest, GPL-3.0-or-later). Rootless Podman on this host.
 
 **D12. Goals are the unit of human approval.**
 - A goal carries an objective, success criteria, a **relevance line** ("what remains useless even if all tests pass"), a budget and a goal-definition pin.
@@ -156,116 +159,27 @@ Out of scope for R1/R2 themselves: scheduling, dashboards, dependencies and prio
   - **Digest:** periodic progress per goal.
   - Everything else is silent but can be asked about. A missing digest at its scheduled time is itself an alarm.
 
+**D16. Core + profiles, and one repo per adoptable piece.**
+- The goal: other hives can adopt each piece on its own, as with R0.
+- **Why:** the roadmap's rule 3 says mechanisms become shared defaults only after beating a baseline. Our goals, proposals, leases and supervision haven't been compared yet, so they're an extension, not the core.
+- **Rule:** an extension may add classes, events, rels, codes and conditions, and add extension-only effects and `data.ext` fields. It may never change a core rule's states or relation, grant existing core classes more, or drop conditions. The gateway refuses to load an extension that tries.
+- **Promotion:** extensions that prove themselves in 1-hive can be proposed for the next core version.
+- **Repos:**
+
+| Repo | Contents | Adoptable alone |
+|---|---|---|
+| `hive-pin` | R0 | yes |
+| `hive-record` (this repo) | R1+R2: spec, gateway, storage, fold engine, CLI, `core` and `1-hive` policies | yes |
+| `hive-supervisor`, `hive-launcher`, `hive-cos`, `hive-notify` | Phase E pieces, HTTP clients of the record | yes |
+| `1-hive` | our deployment: compose files, pinned policy, registry, actors | no (it's our instance) |
+
 ---
 
-## 4. The contracts to freeze (v1)
+## 4. The contracts
 
-These are written and reviewed before implementation. Each is a versioned document or schema with golden fixtures, and any later change is an explicit version bump.
+The contracts now live in [`SPEC.md`](SPEC.md) and are no longer duplicated here: envelope, catalog, lifecycles, legality table, profiles, refusal codes, API, fixtures and acceptance tests. Part I is the **core**, which every adopting hive runs. Part II is the **`1-hive` profile**: goals, proposals, leases, supervision, cost.
 
-### 4.1 The event envelope (`hive.event/1`)
-
-```jsonc
-{
-  "schema": "hive.event/1",
-  "event_id": "…uuidv7…",              // server
-  "run": "1-hive.mtg-player",          // run id
-  "position": 42,                      // server: gapless, per run
-  "recorded_at": "2026-…Z",            // server, informational
-  "actor": {"id": "w.claude.01", "class": "worker"},   // server, from credential
-  "via": "mcp:chief-of-staff",         // server: the channel that carried it (optional)
-  "on_proposal": "…event_id…",         // server: set when applied from an approved proposal
-  "type": "task.result_posted",
-  "goal": "g-0003",                    // when goal-scoped
-  "task": "t-0007",                    // when task-scoped
-  "basis": 41,                         // client: last position observed
-  "idempotency_key": "…",              // client
-  "refs": [{"rel": "result", "pin": { /* canonical R0 pin */ }}],
-  "data": { /* small typed fields, schema per type, size-capped */ }
-}
-```
-
-Content lives in git. `data` is capped and holds only short fields.
-
-### 4.2 The v1 event catalog
-
-- **Run:** `run.opened`, `run.policy_changed`, `run.mode_changed`, `run.closed`.
-- **Actor:** `actor.registered`, `actor.declared`, `actor.retired`.
-- **Proposal:** `proposal.submitted`, `proposal.approved`, `proposal.rejected`, `proposal.withdrawn`.
-- **Goal:** `goal.proposed`, `goal.approved`, `goal.revised`, `goal.completed`, `goal.accepted`, `goal.reopened`, `goal.abandoned`.
-- **Task:** `task.created`, `task.assigned`, `task.accepted`, `task.declined`, `task.blocked`, `task.unblocked`, `task.answered`, `task.reported`, `task.result_posted`, `review.recorded`, `task.closed`, `task.reassigned`, `task.released`, `task.cancelled`.
-- **Supervision:** `task.nudged`, `task.restarted`, `task.escalated`.
-- **Gateway:** `gateway.rejected`.
-
-Reserved for later releases: `message.*`, `skill.*`, `route.*`, `trial.*`, `memory.*`.
-
-### 4.3 The v1 lifecycles
-
-**Goal:** `proposed → active → completed → accepted`, plus `completed → active` (reopened, when the human rejects the outcome) and `any → abandoned`.
-
-| Event | Who | Transition | Requires |
-|---|---|---|---|
-| `goal.proposed` | chief_of_staff, operator | ∅ → proposed | objective, relevance, budget (`usd`, `tokens` and `wall_clock_seconds`, each optional), goal pin |
-| `goal.approved` | **operator** | proposed → active | — |
-| `goal.revised` | chief_of_staff (as a proposal), operator | active → active | new goal pin; a budget increase needs an operator |
-| `goal.completed` | chief_of_staff | active → completed | summary pin; no open tasks |
-| `goal.accepted` | **operator** | completed → accepted | — |
-| `goal.reopened` | **operator** | completed → active | reason |
-| `goal.abandoned` | **operator** | non-terminal → abandoned | reason |
-
-**Task:**
-
-```
-  created ──assigned──▶ assigned ──accepted──▶ in_progress ──result_posted──▶ in_review ──closed*──▶ done
-     ▲                     │                    │     ▲                          │
-     │                     │                blocked  unblocked         review(failed)
-     │                     │                    ▼     │                          │
-     │                     │                    blocked                          ▼
-     │                     │                                                in_progress
-     └── declined ─────────┘
-     └── released ◀── assigned | in_progress | blocked      (the owner gives up)
-         reassigned: assigned | in_progress | blocked ──▶ assigned (new owner)
-         cancelled:  any non-terminal ──▶ cancelled
-
-  * closed requires: latest review of the current result = passed, by a non-author reviewer
-```
-
-| Event | Who (class; relation) | From → to | Must carry or satisfy |
-|---|---|---|---|
-| `task.created` | chief_of_staff, coordinator, operator | ∅ → created | **goal is active**; `order` pin; `title` |
-| `task.assigned` | chief_of_staff, coordinator, operator | created → assigned | the target is an active worker or reviewer; lease (`accept_within`, `checkin_every`) |
-| `task.accepted` | owner | assigned → in_progress | — |
-| `task.declined` | owner | assigned → created | `reason` |
-| `task.blocked` | owner | in_progress → blocked | `needs` ∈ {decision, information, access, external}; `question` pin |
-| `task.answered` | chief_of_staff, operator | blocked → blocked | `answer` pin |
-| `task.unblocked` | owner | blocked → in_progress | after an answer, when the block needed a decision or information |
-| `task.reported` | owner | no change | `kind` ∈ {progress, checkpoint, finding, reflection}; one pin; optional `cost` |
-| `task.result_posted` | owner | in_progress → in_review | `result` pin; becomes the *current result*; optional `cost` |
-| `review.recorded` | reviewer, operator; **not the author** | in_review → in_review (passed) / in_progress (failed) | `verdict`; `result_event` = the current result; `review` pin |
-| `task.closed` | chief_of_staff, coordinator, operator | in_review → **done** | **the latest review of the current result passed** |
-| `task.reassigned` | chief_of_staff, coordinator, supervisor, operator | assigned, in_progress, blocked → assigned | a new owner; a lease; `reason` |
-| `task.released` | owner | assigned, in_progress, blocked → created | `reason` |
-| `task.cancelled` | chief_of_staff, operator | non-terminal → cancelled | `reason` |
-| `task.nudged` | supervisor | no change | `reason` (e.g. missed check-in); optional `diagnosis` pin |
-| `task.restarted` | supervisor | no change; attempt count +1 | `context` pin (the generated bundle); `reason`; optional `diagnosis` pin |
-| `task.escalated` | supervisor, chief_of_staff, owner | no change; flagged | `to` ∈ {chief_of_staff, human}; `reason` |
-
-`done` and `cancelled` are terminal. The attempt count, the escalation flag and the time of the last check-in are fold state, used by the supervisor and the inbox.
-
-### 4.4 Refusal codes (stable)
-
-`SCHEMA_INVALID`, `UNSUPPORTED_SCHEMA`, `UNKNOWN_EVENT_TYPE`, `PAYLOAD_TOO_LARGE`, `UNKNOWN_RUN`, `RUN_CLOSED`, `UNKNOWN_GOAL`, `GOAL_NOT_ACTIVE`, `GOAL_HAS_OPEN_TASKS`, `UNKNOWN_TASK`, `TASK_EXISTS`, `UNKNOWN_ACTOR`, `ACTOR_RETIRED`, `NOT_AUTHORIZED`, `NOT_OWNER`, `ILLEGAL_TRANSITION`, `REF_MISSING`, `REF_NOT_ALLOWED`, `PIN_INVALID`, `PIN_UNAVAILABLE` (retryable), `REVIEW_REQUIRED`, `REVIEW_NOT_INDEPENDENT`, `REVIEW_STALE`, `PROPOSAL_NOT_PENDING`, `PROPOSAL_STALE`, `IDEMPOTENCY_CONFLICT`. Read side: `STALE_GENERATION`.
-
-### 4.5 API contract
-
-- **Write:** `POST /v1/runs/{run}/events`.
-- **Read:** `GET …/events?after=`, `GET …/subscribe`, `GET …/board?at=`, `GET …/tasks/{id}`, `GET …/goals/{id}`, `GET …/inbox`, `GET /v1/runs`.
-- **Admin, through the CLI:** open a run, register an actor, issue a credential, flip the mode.
-
-Every response carries the generation token.
-
-### 4.6 Golden fixtures
-
-Canonical logs in JSONL, each with the expected board, goals, inbox and refusals at every position. They are our conformance suite and the target for R3's projections.
+SPEC.md Appendix A lists where the spec departs from this plan's earlier drafts, e.g. one log per hive instead of per-run logs.
 
 ---
 
@@ -286,25 +200,7 @@ Canonical logs in JSONL, each with the expected board, goals, inbox and refusals
 
 ## 6. The deliberate-failure suite (R2)
 
-Each case asserts that the write is refused, that the refusal is recorded where it can be attributed, and that the board is unchanged.
-
-- **Wrong class:** a worker creates, assigns or closes; an agent approves or accepts a goal; the supervisor closes; an instrument makes a transition.
-- **Not the owner:** a worker accepts, blocks or posts a result on someone else's task.
-- **Wrong state:** accepting an unassigned task; posting a result from `blocked`; closing from `in_progress`; anything out of `done` or `cancelled`.
-- **Goal gating:** creating a task under a proposed, completed or abandoned goal; completing a goal with open tasks; an agent raising the budget.
-- **Review gating:** closing with no review (`REVIEW_REQUIRED`); closing after a failed review; closing after a pass on a superseded result (`REVIEW_STALE`); a review by the author (`REVIEW_NOT_INDEPENDENT`); a review from a non-reviewer.
-- **Proposals:** approving twice; approving after the state has moved on (`PROPOSAL_STALE`); an approver without authority for the proposed event.
-- **Pins:** a missing rel; a malformed pin; an unpublished commit; a digest mismatch; an unknown repository; a remote outage (retryable).
-- **Identity:** a missing or invalid credential (not recorded); a retired actor; a request body claiming a different actor (the credential wins).
-- **Around the gateway:** writes as `hive_reader` fail; `UPDATE` or `DELETE` as `hive_gateway` fails.
-- **Structural:** an unknown type; a schema violation; an oversized `data`; an unsupported version; an idempotency conflict.
-- **Restore:** a cursor from before a restore → `STALE_GENERATION`.
-
-**Property tests:**
-- `done` ⇒ a passed review of the current result by a non-author;
-- every task belongs to a goal that was active when the task was created;
-- in authoritative mode, every appended event passed its guard;
-- the fold is deterministic, and an independent reader computes the same board.
+Specified in SPEC.md §22.2 (core) and §27 (`1-hive`). The core property tests run under every shipped profile, which proves that extensions don't weaken core invariants.
 
 ---
 
@@ -345,6 +241,8 @@ Ordered by dependency and quality gates. No calendar estimates.
 4. **Exit:** an end-to-end manual goal → task → review → close on scratch, then on the real run.
 
 **Phase E — The operating loop (minimal, for 1-hive).**
+Each piece below is its own repo (D16) and depends only on the record's HTTP API and schemas.
+
 1. **Launcher:** starts a worker for an assigned task with a context bundle generated from the record; each worker gets a task-scoped clone. First adapter: Claude Code (headless or tmux). Codex as the second harness, for reviews. OmegaClaw adapter next.
 2. **Review dispatch:** `task.result_posted` starts a reviewer on a different harness or model; a failed review restarts the owner with the review attached.
 3. **Supervisor:** a deterministic loop running roughly every minute, using the ladder in D14, plus the triage agent at triggers. Trial AgentsView as the progress, cost and transcript source.
