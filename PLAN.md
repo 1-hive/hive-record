@@ -1,6 +1,6 @@
 # hive-record — plan for One Hive R1 + R2, and 1-hive's operating loop
 
-**Status:** agreed plan · 2026-09-23 · rev 5 (core + profiles; repo split; renamed to hive-record)
+**Status:** agreed plan · 2026-09-23 · rev 6 (signed-key identity, per-worker sandboxes, review assignment; after reviewing Ben's and Kabir's proposals)
 **Scope:** R1 (the record) and R2 (legality table and review-gated close) from the *One Hive incremental release plan*, then a minimal operating loop so that our own hive, **1-hive**, actually runs. 1-hive's first workload is `mtg-player` (`~/repos/hive-workspace.git`); more follow.
 **Sources, newest-governing first:** the incremental release plan; *One Hive roadmap*, Ben's revision; *roadmap differences* (Aug 31); Cassio's original roadmap; *OmegaHive: A Running Hive* (Jul 29), used as the technical reference for record semantics; the frozen R0 spec and `hivepin` 1.0.0 (Sep 8); and `~/cassio-hive`, a running implementation that we mine for lessons.
 
@@ -86,7 +86,7 @@ Out of scope for R1/R2 themselves: scheduling, dashboards, dependencies and prio
 
 **Agreed so far (2026-09-23):** gateway as a service (D1); mirror mode built, adapter deferred (D4); approvals at goal level (D12); budgets in any of three units (D12); reviewer ≠ author is enough for v1 (D3); supervisor defaults and triage agent (D14); a single front agent that starts as a Claude Code session (D15); Phase E is in scope; repeated failures interrupt the human; naming (D11); core + profiles and the repo split (D16).
 
-**D1. The gateway is a narrow service with sole write access to the database.** It speaks HTTP/JSON over a Unix socket or loopback/tailnet. It authenticates callers with per-actor bearer credentials and **derives actor and class from the credential**. This makes "nothing writes around the gateway" and "authorized actor" (clause 6) real, and it lets non-Python and sandboxed clients take part without database credentials.
+**D1. The gateway is a narrow service with sole write access to the database.** It speaks HTTP/JSON over a Unix socket or loopback/tailnet. Every request is **signed with the actor's own key** (ed25519 in v1; the key type is pluggable), and the gateway **derives actor and class from the key**. Signatures are stored with events, so the log can be re-verified by anyone, including other hives. (Draft.2 used bearer tokens; changed to match the Omega architecture's key-based identity.) This makes "nothing writes around the gateway" and "authorized actor" (clause 6) real, and it lets non-Python and sandboxed clients take part without database credentials.
 
 **D2. Postgres, append-only by construction.**
 - Two database roles: `hive_gateway` with `INSERT` only, `hive_reader` with `SELECT` only.
@@ -122,7 +122,7 @@ Out of scope for R1/R2 themselves: scheduling, dashboards, dependencies and prio
 - Under an **active** goal, the chief of staff and coordinator may create, assign and close tasks with no human approval. Creating a task needs an active goal.
 - Task close needs an independent, agent-level passed review. In v1, independent means the reviewer isn't the author; Phase E still dispatches reviews to a different harness or model. **The human's review happens at goal level:** accepting or rejecting the completed goal.
 - **Budget:** any of `usd`, `tokens` and `wall_clock_seconds`. A dimension that isn't set isn't enforced.
-- **Cost:** reported by the harness adapter as optional `cost` fields (the same three dimensions) on `task.reported` and `task.result_posted`. Spend per goal is computed from the log. When a set dimension is exceeded, the goal escalates to the human as a budget overrun.
+- **Cost:** measured by the model gateway/router, where the agent can't change it, and attached as optional `cost` fields (the same three dimensions) on `task.reported` and `task.result_posted`. Harness self-reports (or AgentsView) are only a labeled estimate, used where the router can't measure, e.g. some subscription usage. Spend per goal is computed from the log. When a set dimension is exceeded, the goal escalates to the human as a budget overrun.
 
 **D13. Proposals and approvals are native to the record.**
 - Any agent may submit `proposal.submitted` under its own identity, carrying the exact event it wants recorded.
@@ -243,10 +243,10 @@ Ordered by dependency and quality gates. No calendar estimates.
 **Phase E — The operating loop (minimal, for 1-hive).**
 Each piece below is its own repo (D16) and depends only on the record's HTTP API and schemas.
 
-1. **Launcher:** starts a worker for an assigned task with a context bundle generated from the record; each worker gets a task-scoped clone. First adapter: Claude Code (headless or tmux). Codex as the second harness, for reviews. OmegaClaw adapter next.
-2. **Review dispatch:** `task.result_posted` starts a reviewer on a different harness or model; a failed review restarts the owner with the review attached.
-3. **Supervisor:** a deterministic loop running roughly every minute, using the ladder in D14, plus the triage agent at triggers. Trial AgentsView as the progress, cost and transcript source.
-4. **Chief of staff:** a long-running Claude Code session with a `hive` MCP server (read, propose, answer, re-plan), holding its own credential only.
+1. **Launcher:** starts a worker for an assigned task with a context bundle generated from the record; each worker gets a task-scoped clone. **Each agent runs in its own rootless Podman container** with its own filesystem and its own key; no two agents share a process, container, filesystem, OS user or key (SPEC §6.6). The launcher starts, watches and stops containers; it never hosts workers itself. First adapter: Claude Code (headless, in a container). Codex as the second harness, for reviews. OmegaClaw adapter next. Every launch carries a stable intent id, and a launch whose outcome is unknown after a crash is marked indeterminate and reconciled, never blindly re-launched.
+2. **Review dispatch:** on `task.result_posted`, the chief of staff (or coordinator) emits `review.assigned` and the launcher starts that reviewer in **its own container, with its own key**, on a different harness or model. The verdict goes straight to the gateway, never back through the worker. A failed or `needs_information` review restarts the owner with the review attached.
+3. **Supervisor:** a deterministic loop running roughly every minute, using the ladder in D14, plus the triage agent at triggers. Trial AgentsView as the progress and transcript source (cost comes from the router).
+4. **Chief of staff:** a long-running Claude Code session with a `hive` MCP server (read, propose, answer, re-plan), in its own container and holding only its own key.
 5. **Human surfaces:** the chief-of-staff conversation, and push notifications for interrupts with one-tap approve and accept. Telegram is the candidate; it's formally R7, pulled forward for 1-hive.
 6. **Exit:** the adoption criteria below.
 
