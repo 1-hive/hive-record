@@ -798,7 +798,7 @@ The core inbox's operator items move to the chief of staff: in this profile, hum
 
 ---
 
-## Appendix A. Changes from PLAN.md
+## Appendix A. Changes from the 1-hive plan (`1-hive/PLAN.md`)
 
 - **One log per hive** with a global position, instead of per-run logs. Actors are hive-wide. Projects group work. Scratch runs become scratch hives. `run.*` events become `hive.*` and `project.*`.
 - **Identity is a public key** (draft.3). Requests are signed, and signatures are stored with events. This replaces draft.2's bearer credentials. It matches the Omega architecture (v2.16) and makes the log verifiable by other hives.
