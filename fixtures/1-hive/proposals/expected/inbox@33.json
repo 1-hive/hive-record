@@ -1,0 +1,14 @@
+{
+  "arbiter": [],
+  "chief_of_staff": [
+    {
+      "entity": "goal",
+      "id": "g2",
+      "key": "goal_active_all_terminal:g2:31",
+      "kind": "goal_active_all_terminal",
+      "position": 31,
+      "title": "Goal two"
+    }
+  ],
+  "operator": []
+}

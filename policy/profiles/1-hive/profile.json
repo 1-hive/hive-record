@@ -1,0 +1,56 @@
+{
+  "schema": "hive.profile/1",
+  "name": "1-hive",
+  "version": "1.0.0",
+  "extends": "core@1",
+  "add_classes": ["chief_of_staff", "supervisor"],
+  "add_rels": ["goal", "summary", "context", "diagnosis"],
+  "add_codes": ["UNKNOWN_GOAL", "GOAL_EXISTS", "GOAL_NOT_ACTIVE", "GOAL_HAS_OPEN_TASKS", "BUDGET_RAISE_REQUIRES_OPERATOR", "INVALID_REVIEW_TARGET", "NOT_ESCALATED", "UNKNOWN_PROPOSAL", "PROPOSAL_EXISTS", "PROPOSAL_NOT_PENDING", "PROPOSAL_NOT_APPLICABLE"],
+  "waivable_codes": [],
+  "entities": {
+    "goal": {"collection": "goals", "id": "goal", "state_field": "status", "states": ["proposed", "active", "completed", "accepted", "abandoned"], "terminal": ["accepted", "abandoned"], "unknown_code": "UNKNOWN_GOAL", "exists_code": "GOAL_EXISTS", "illegal_code": "ILLEGAL_TRANSITION", "mirrorable": true},
+    "proposal": {"collection": "proposals", "id": "data.proposal_id", "state_field": "status", "states": ["pending", "approved", "rejected", "withdrawn"], "terminal": ["approved", "rejected", "withdrawn"], "unknown_code": "UNKNOWN_PROPOSAL", "exists_code": "PROPOSAL_EXISTS", "illegal_code": "PROPOSAL_NOT_PENDING", "mirrorable": false}
+  },
+  "rules": [
+    {"event": "goal.proposed", "entity": "goal", "classes": ["chief_of_staff", "operator"], "relation": null, "from": null, "to": "proposed", "refs": {"required": ["goal"], "allowed": []}, "conditions": ["project_open"], "effects": ["create_goal"]},
+    {"event": "goal.approved", "entity": "goal", "classes": ["operator"], "relation": null, "from": ["proposed"], "to": "active", "refs": {"required": [], "allowed": []}, "conditions": [], "effects": ["mark_goal_approved"]},
+    {"event": "goal.revised", "entity": "goal", "classes": ["chief_of_staff", "operator"], "relation": null, "from": ["proposed", "active"], "to": "same", "refs": {"required": [], "allowed": ["goal"]}, "conditions": ["budget_not_raised_unless_operator"], "effects": ["update_goal_fields"]},
+    {"event": "goal.completed", "entity": "goal", "classes": ["chief_of_staff", "operator"], "relation": null, "from": ["active"], "to": "completed", "refs": {"required": ["summary"], "allowed": []}, "conditions": ["goal_has_no_open_tasks"], "effects": ["record_goal_outcome"]},
+    {"event": "goal.accepted", "entity": "goal", "classes": ["operator"], "relation": null, "from": ["completed"], "to": "accepted", "refs": {"required": [], "allowed": []}, "conditions": [], "effects": []},
+    {"event": "goal.reopened", "entity": "goal", "classes": ["operator"], "relation": null, "from": ["completed"], "to": "active", "refs": {"required": [], "allowed": []}, "conditions": [], "effects": []},
+    {"event": "goal.abandoned", "entity": "goal", "classes": ["operator"], "relation": null, "from": ["proposed", "active", "completed"], "to": "abandoned", "refs": {"required": [], "allowed": []}, "conditions": [], "effects": []},
+    {"event": "goal.escalated", "entity": "goal", "classes": ["supervisor", "chief_of_staff"], "relation": null, "from": "open", "to": "same", "refs": {"required": [], "allowed": ["diagnosis"]}, "conditions": [], "effects": ["open_escalation"]},
+    {"event": "goal.escalation_resolved", "entity": "goal", "classes": ["chief_of_staff", "operator"], "relation": null, "from": "*", "to": "same", "refs": {"required": [], "allowed": []}, "conditions": ["is_escalated"], "effects": ["close_escalation"]},
+    {"event": "proposal.submitted", "entity": "proposal", "classes": "*", "relation": null, "from": null, "to": "pending", "refs": {"required": [], "allowed": ["rationale"]}, "conditions": ["proposed_request_well_formed"], "effects": ["create_proposal"]},
+    {"event": "proposal.approved", "entity": "proposal", "classes": ["operator", "chief_of_staff", "coordinator"], "relation": null, "from": ["pending"], "to": "approved", "refs": {"required": [], "allowed": []}, "conditions": ["approver_matches", "proposal_applicable"], "effects": ["decide_proposal"]},
+    {"event": "proposal.rejected", "entity": "proposal", "classes": ["operator", "chief_of_staff", "coordinator"], "relation": null, "from": ["pending"], "to": "rejected", "refs": {"required": [], "allowed": []}, "conditions": ["approver_matches"], "effects": ["decide_proposal"]},
+    {"event": "proposal.withdrawn", "entity": "proposal", "classes": "*", "relation": "proposer", "from": ["pending"], "to": "withdrawn", "refs": {"required": [], "allowed": []}, "conditions": [], "effects": ["decide_proposal"]},
+    {"event": "task.nudged", "entity": "task", "classes": ["supervisor"], "relation": null, "from": ["assigned", "in_progress", "blocked", "in_review"], "to": "same", "refs": {"required": [], "allowed": ["diagnosis"]}, "conditions": [], "effects": ["count_nudge"]},
+    {"event": "task.restarted", "entity": "task", "classes": ["supervisor"], "relation": null, "from": ["assigned", "in_progress", "blocked"], "to": "same", "refs": {"required": ["context"], "allowed": ["diagnosis"]}, "conditions": [], "effects": ["increment_attempt"]},
+    {"event": "task.escalated", "entity": "task", "classes": ["supervisor", "chief_of_staff", "worker", "reviewer"], "relation": "owner", "from": "open", "to": "same", "refs": {"required": [], "allowed": ["diagnosis"]}, "conditions": [], "effects": ["open_escalation"]},
+    {"event": "task.escalation_resolved", "entity": "task", "classes": ["chief_of_staff", "operator"], "relation": null, "from": "*", "to": "same", "refs": {"required": [], "allowed": []}, "conditions": ["is_escalated"], "effects": ["close_escalation"]}
+  ],
+  "amend": {
+    "project.opened": {"add_classes": ["chief_of_staff"]},
+    "project.closed": {"add_conditions": ["project_has_no_open_goals"]},
+    "task.created": {"add_classes": ["chief_of_staff"], "require_goal": true, "add_conditions": ["goal_active", "review_task_target_valid"], "add_effects": ["init_task_ext"]},
+    "task.assigned": {"add_classes": ["chief_of_staff"], "require_ext": ["lease"], "add_conditions": ["review_task_assignee_not_author"], "add_effects": ["set_lease"]},
+    "task.reassigned": {"add_classes": ["chief_of_staff", "supervisor"], "require_ext": ["lease"], "add_conditions": ["review_task_assignee_not_author"], "add_effects": ["set_lease"]},
+    "task.answered": {"add_classes": ["chief_of_staff"]},
+    "task.closed": {"add_classes": ["chief_of_staff"]},
+    "review.assigned": {"add_classes": ["chief_of_staff"]},
+    "task.cancelled": {"add_classes": ["chief_of_staff"]},
+    "task.reported": {"add_effects": ["add_cost"]},
+    "task.result_posted": {"add_effects": ["add_cost"]},
+    "review.recorded": {"add_effects": ["add_cost"]}
+  },
+  "hooks": {
+    "on_touch": ["reset_nudges"],
+    "on_terminal": ["close_escalation"]
+  },
+  "inbox": {
+    "operator": ["goal_proposed", "goal_completed", "proposal_pending", "escalation_open", "goal_abandoned_open_tasks", "exception_pending"],
+    "chief_of_staff": ["proposal_pending", "escalation_open", "task_blocked_unanswered_any", "goal_active_all_terminal", "task_passed_not_closed"],
+    "arbiter": ["exception_pending"]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/profiles/1-hive/schemas/events/task.escalated.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "to",
+    "code",
+    "reason"
+  ],
+  "properties": {
+    "to": {
+      "type": "string",
+      "enum": [
+        "chief_of_staff",
+        "operator"
+      ]
+    },
+    "code": {
+      "type": "string",
+      "enum": [
+        "repeated_failure",
+        "stuck",
+        "review_loop",
+        "question",
+        "other"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    }
+  }
+}

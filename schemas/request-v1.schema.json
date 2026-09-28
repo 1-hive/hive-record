@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/1-hive/hive-record/schemas/request-v1.schema.json",
+  "title": "hive.request/1 (SPEC \u00a77.2)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "basis",
+    "idempotency_key",
+    "refs",
+    "data"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$",
+      "maxLength": 64
+    },
+    "task": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64
+    },
+    "goal": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64
+    },
+    "basis": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "expected_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+    },
+    "refs": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rel",
+          "pin"
+        ],
+        "properties": {
+          "rel": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 64
+          },
+          "pin": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "data": {
+      "type": "object"
+    }
+  }
+}
+

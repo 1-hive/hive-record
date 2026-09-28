@@ -1,0 +1,23 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/core/schemas/events/task.reported.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "progress",
+        "checkpoint",
+        "finding",
+        "reflection"
+      ]
+    },
+    "ext": {
+      "type": "object"
+    }
+  }
+}

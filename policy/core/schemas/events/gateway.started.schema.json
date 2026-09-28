@@ -1,0 +1,34 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/core/schemas/events/gateway.started.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "source_commit",
+    "policy_digest",
+    "registry_digest"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "source_commit": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "policy_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "maxLength": 71
+    },
+    "registry_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "maxLength": 71
+    }
+  }
+}

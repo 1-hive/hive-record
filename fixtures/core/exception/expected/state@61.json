@@ -1,0 +1,390 @@
+{
+  "actors": {
+    "arb": {
+      "class": "arbiter",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:arb"
+      },
+      "id": "arb",
+      "keys": [
+        "ed25519:JGgijarddh8T7kKHXZiK6urdt-K3NgxrfB1QoJGpdMY"
+      ],
+      "registered_at": "2026-09-01T12:08:00.000000Z",
+      "revoked_keys": [],
+      "role": "arbiter",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 9
+    },
+    "coord": {
+      "class": "coordinator",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:coord"
+      },
+      "id": "coord",
+      "keys": [
+        "ed25519:IHkWTNzUAL4iIC5Xh8IR_7NhRQzNYVR7fcmRTot33UQ"
+      ],
+      "registered_at": "2026-09-01T12:02:00.000000Z",
+      "revoked_keys": [],
+      "role": "coordinator",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 3
+    },
+    "inst": {
+      "class": "instrument",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:inst"
+      },
+      "id": "inst",
+      "keys": [
+        "ed25519:8wSsqaUc7Qp0pKpahYJfSia_1ECiTepv9auAsuRVNNo"
+      ],
+      "registered_at": "2026-09-01T12:07:00.000000Z",
+      "revoked_keys": [],
+      "role": "instrument",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 8
+    },
+    "op": {
+      "class": "operator",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:op"
+      },
+      "id": "op",
+      "keys": [
+        "ed25519:6VHGeFQf2CDONTn_-g96H_QjBYGefjQbf5s0B3PprcQ"
+      ],
+      "registered_at": "2026-09-01T12:00:00.000000Z",
+      "revoked_keys": [],
+      "role": "owner",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 1
+    },
+    "rv1": {
+      "class": "reviewer",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:rv1"
+      },
+      "id": "rv1",
+      "keys": [
+        "ed25519:IcXubcT-xRq0Aj8QduE1n-e9HyGLTnhnINt-vW3foAc"
+      ],
+      "registered_at": "2026-09-01T12:05:00.000000Z",
+      "revoked_keys": [],
+      "role": "reviewer",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 6
+    },
+    "rv2": {
+      "class": "reviewer",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:rv2"
+      },
+      "id": "rv2",
+      "keys": [
+        "ed25519:sVjJ1HCkx0KNWQHV8CDEnbABulu6e7NGKmFsSwhrOVk"
+      ],
+      "registered_at": "2026-09-01T12:06:00.000000Z",
+      "revoked_keys": [],
+      "role": "reviewer",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 7
+    },
+    "w1": {
+      "class": "worker",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:w1"
+      },
+      "id": "w1",
+      "keys": [
+        "ed25519:4Otc5uqVcJkqsp24Q73KPqK6UTUF7uKA6HGtuDiqZH8"
+      ],
+      "registered_at": "2026-09-01T12:03:00.000000Z",
+      "revoked_keys": [],
+      "role": "worker",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 4
+    },
+    "w2": {
+      "class": "worker",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:w2"
+      },
+      "id": "w2",
+      "keys": [
+        "ed25519:sZYNZMmTtdx_E5u9TDlpRTdxrfTZXwA9HeKD0ciRSy8"
+      ],
+      "registered_at": "2026-09-01T12:04:00.000000Z",
+      "revoked_keys": [],
+      "role": "worker",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 5
+    }
+  },
+  "exceptions": {
+    "e1": {
+      "advice": [
+        {
+          "actor": "inst",
+          "position": 22,
+          "recommendation": "grant"
+        }
+      ],
+      "applied_event": {
+        "event_id": "01a05cef-e220-7de1-8f9c-3c5a55485822",
+        "position": 29
+      },
+      "decided_at": "2026-09-01T12:27:00.000000Z",
+      "decided_by": "arb",
+      "id": "e1",
+      "reason": "Reopen t1 for w2; see the rationale",
+      "refusal": {
+        "code": "ILLEGAL_TRANSITION",
+        "event_id": "01a05ce6-ba60-75a9-943c-91156f25e2a2",
+        "position": 18,
+        "task": "t1",
+        "type": "task.reassigned"
+      },
+      "requester": "coord",
+      "status": "granted",
+      "status_since": 28
+    },
+    "e2": {
+      "advice": [
+        {
+          "actor": "inst",
+          "position": 40,
+          "recommendation": "deny"
+        }
+      ],
+      "applied_event": null,
+      "decided_at": "2026-09-01T12:40:00.000000Z",
+      "decided_by": "op",
+      "id": "e2",
+      "reason": "the metrics bot can do it",
+      "refusal": {
+        "code": "INVALID_ASSIGNEE",
+        "event_id": "01a05cf9-09e0-77d4-934a-e77a1beb3711",
+        "position": 38,
+        "task": "t2",
+        "type": "task.assigned"
+      },
+      "requester": "coord",
+      "status": "denied",
+      "status_since": 41
+    },
+    "e3": {
+      "advice": [],
+      "applied_event": null,
+      "decided_at": "2026-09-01T12:45:00.000000Z",
+      "decided_by": "coord",
+      "id": "e3",
+      "reason": "hurry",
+      "refusal": {
+        "code": "ILLEGAL_TRANSITION",
+        "event_id": "01a05cfc-b360-7340-b329-d051f6be1f72",
+        "position": 42,
+        "task": "t2",
+        "type": "task.reassigned"
+      },
+      "requester": "coord",
+      "status": "withdrawn",
+      "status_since": 46
+    },
+    "e5": {
+      "advice": [],
+      "applied_event": null,
+      "decided_at": null,
+      "decided_by": null,
+      "id": "e5",
+      "reason": "reopen",
+      "refusal": {
+        "code": "ILLEGAL_TRANSITION",
+        "event_id": "01a05d0c-43c0-7d97-b948-518137176e84",
+        "position": 59,
+        "task": "t1",
+        "type": "task.reassigned"
+      },
+      "requester": "op",
+      "status": "pending",
+      "status_since": 60
+    }
+  },
+  "hive": {
+    "gateway": {
+      "position": 2,
+      "registry_digest": "sha256:63b37a9c21a4f07c2760bcab977d192674536969da66b6f95e55a81f7783854f",
+      "since": "2026-09-01T12:01:00.000000Z",
+      "source_commit": "0000000000000000000000000000000000000000",
+      "version": "fixture"
+    },
+    "head": 61,
+    "hive": "fixture",
+    "mode": "authoritative",
+    "policy": {
+      "commit_oid": "sha1:04b79e035df5feb13ab1be973c4a77e59fe85984",
+      "content_digest": "sha256:4f71e3be3e92b675d6b740919026587eb4ca9ae4392dca65014a5299c46c7f23",
+      "kind": "tree",
+      "object_oid": "sha1:fb205d98e7c26657ddd0402fdba6983245c8d74a",
+      "path": "policy",
+      "repository": "fixture",
+      "version": 1
+    },
+    "profile": "core",
+    "registry_digest": "sha256:63b37a9c21a4f07c2760bcab977d192674536969da66b6f95e55a81f7783854f"
+  },
+  "projects": {
+    "p1": {
+      "id": "p1",
+      "opened_at": "2026-09-01T12:09:00.000000Z",
+      "status": "open",
+      "status_since": 10,
+      "title": "Project one"
+    }
+  },
+  "tasks": {
+    "t1": {
+      "assigned_at": "2026-09-01T12:27:00.000000Z",
+      "assigned_reviewer": "rv2",
+      "block": null,
+      "created_at": "2026-09-01T12:10:00.000000Z",
+      "created_by": "coord",
+      "current_result": {
+        "at": "2026-09-01T12:31:00.000000Z",
+        "author": "w2",
+        "event_id": "01a05cf3-8ba0-7eac-8e30-658b9148624f",
+        "pin": {
+          "commit_oid": "sha1:04b79e035df5feb13ab1be973c4a77e59fe85984",
+          "content_digest": "sha256:885a35b4d1ac211935ddd76978d0d92fbd9c5e97c6f90e9d8576c4ffb9c3e399",
+          "kind": "file",
+          "mode": "100644",
+          "object_oid": "sha1:70fd74326644c66aad00ee23071d94c346d3c533",
+          "path": "content/result-2.md",
+          "repository": "fixture",
+          "version": 1
+        },
+        "position": 32
+      },
+      "exceptions_applied": 1,
+      "ext": {},
+      "goal": null,
+      "id": "t1",
+      "last_activity": {
+        "at": "2026-09-01T12:31:00.000000Z",
+        "position": 32
+      },
+      "latest_review": {
+        "event_id": "01a05cf6-4ac0-772a-8526-06341759edc3",
+        "position": 35,
+        "review_pin": {
+          "commit_oid": "sha1:04b79e035df5feb13ab1be973c4a77e59fe85984",
+          "content_digest": "sha256:b487f2ec6923cb3eca5b7892c228142635404949c753f54636ff418b14bd6393",
+          "kind": "file",
+          "mode": "100644",
+          "object_oid": "sha1:82fd33541514d09456d9bd4bf4723575a3d83274",
+          "path": "content/review-2.md",
+          "repository": "fixture",
+          "version": 1
+        },
+        "reviewer": "rv2",
+        "verdict": "passed"
+      },
+      "order": {
+        "commit_oid": "sha1:04b79e035df5feb13ab1be973c4a77e59fe85984",
+        "content_digest": "sha256:b2dde536a6f1aa0dbf24160f57dcabb606df084e9493a948b3e452eda3535132",
+        "kind": "file",
+        "mode": "100644",
+        "object_oid": "sha1:aba69487b4edfcb3a93bc36dd1a12e77986d4208",
+        "path": "content/order-1.md",
+        "repository": "fixture",
+        "version": 1
+      },
+      "owner": "w2",
+      "project": "p1",
+      "reassignments": 1,
+      "results_count": 2,
+      "reviews_failed_count": 0,
+      "revision": 13,
+      "status": "done",
+      "status_since": 36,
+      "title": "Task t1",
+      "violations": 0
+    },
+    "t2": {
+      "assigned_at": "2026-09-01T12:43:00.000000Z",
+      "assigned_reviewer": null,
+      "block": null,
+      "created_at": "2026-09-01T12:36:00.000000Z",
+      "created_by": "coord",
+      "current_result": {
+        "at": "2026-09-01T12:47:00.000000Z",
+        "author": "w2",
+        "event_id": "01a05d02-31a0-7d24-821c-38572fcd81b5",
+        "pin": {
+          "commit_oid": "sha1:04b79e035df5feb13ab1be973c4a77e59fe85984",
+          "content_digest": "sha256:d4758fc016ecbeecdc267ac2de628a8f7a2ed0c020ad1fd6b962b2642ef16c4c",
+          "kind": "file",
+          "mode": "100644",
+          "object_oid": "sha1:b448fdfca8820e6eea81b0f295e78cea81d33040",
+          "path": "content/result-3.md",
+          "repository": "fixture",
+          "version": 1
+        },
+        "position": 48
+      },
+      "exceptions_applied": 0,
+      "ext": {},
+      "goal": null,
+      "id": "t2",
+      "last_activity": {
+        "at": "2026-09-01T12:47:00.000000Z",
+        "position": 48
+      },
+      "latest_review": null,
+      "order": {
+        "commit_oid": "sha1:04b79e035df5feb13ab1be973c4a77e59fe85984",
+        "content_digest": "sha256:1d73910e1c13e4addef8e58a4718e104b02e82c475ec1c299eb6f835351c5e49",
+        "kind": "file",
+        "mode": "100644",
+        "object_oid": "sha1:8bae318b683c12189e5699657dbd794d1133caeb",
+        "path": "content/order-2.md",
+        "repository": "fixture",
+        "version": 1
+      },
+      "owner": "w2",
+      "project": "p1",
+      "reassignments": 0,
+      "results_count": 1,
+      "reviews_failed_count": 0,
+      "revision": 4,
+      "status": "in_review",
+      "status_since": 48,
+      "title": "Task t2",
+      "violations": 0
+    }
+  }
+}

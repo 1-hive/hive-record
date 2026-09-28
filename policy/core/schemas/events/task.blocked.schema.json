@@ -1,0 +1,29 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/core/schemas/events/task.blocked.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "needs",
+    "reason"
+  ],
+  "properties": {
+    "needs": {
+      "type": "string",
+      "enum": [
+        "decision",
+        "information",
+        "access",
+        "external"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "ext": {
+      "type": "object"
+    }
+  }
+}

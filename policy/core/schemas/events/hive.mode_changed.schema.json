@@ -1,0 +1,17 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/core/schemas/events/hive.mode_changed.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mode"
+  ],
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "authoritative"
+      ]
+    }
+  }
+}

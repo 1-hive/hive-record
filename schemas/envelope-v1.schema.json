@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/1-hive/hive-record/schemas/envelope-v1.schema.json",
+  "title": "hive.event/1 (SPEC \u00a77.1)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "hive",
+    "position",
+    "event_id",
+    "recorded_at",
+    "actor",
+    "type",
+    "basis",
+    "idempotency_key",
+    "refs",
+    "data"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$",
+      "maxLength": 64
+    },
+    "task": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64
+    },
+    "goal": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64
+    },
+    "basis": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "expected_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+    },
+    "refs": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rel",
+          "pin"
+        ],
+        "properties": {
+          "rel": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 64
+          },
+          "pin": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "data": {
+      "type": "object"
+    },
+    "schema": {
+      "const": "hive.event/1"
+    },
+    "hive": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64
+    },
+    "position": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "event_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "recorded_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d{6}Z$"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "class"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "maxLength": 64
+        },
+        "class": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "maxLength": 64
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "signed_at",
+        "sig"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^ed25519:[A-Za-z0-9_-]{43}$"
+        },
+        "signed_at": {
+          "type": "string"
+        },
+        "sig": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{86}$"
+        }
+      }
+    },
+    "via": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9:._-]*$",
+      "maxLength": 64
+    },
+    "on_proposal": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64
+    },
+    "verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "legal"
+      ],
+      "properties": {
+        "legal": {
+          "type": "boolean"
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "maxLength": 64
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "on_exception": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "arbiter": [],
+  "chief_of_staff": [],
+  "operator": [
+    {
+      "entity": "goal",
+      "id": "g1",
+      "key": "escalation_open:g1:22",
+      "kind": "escalation_open",
+      "position": 22,
+      "title": "budget_exceeded: Goal one, narrowed"
+    }
+  ]
+}

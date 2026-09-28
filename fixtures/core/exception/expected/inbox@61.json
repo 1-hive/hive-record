@@ -1,0 +1,30 @@
+{
+  "arbiter": [
+    {
+      "entity": "exception",
+      "id": "e5",
+      "key": "exception_pending:e5:60",
+      "kind": "exception_pending",
+      "position": 60,
+      "title": "ILLEGAL_TRANSITION on task.reassigned t1"
+    }
+  ],
+  "operator": [
+    {
+      "entity": "task",
+      "id": "t2",
+      "key": "task_review_unassigned:t2:48",
+      "kind": "task_review_unassigned",
+      "position": 48,
+      "title": "Task t2"
+    },
+    {
+      "entity": "exception",
+      "id": "e5",
+      "key": "exception_pending:e5:60",
+      "kind": "exception_pending",
+      "position": 60,
+      "title": "ILLEGAL_TRANSITION on task.reassigned t1"
+    }
+  ]
+}

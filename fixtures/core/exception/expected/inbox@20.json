@@ -1,0 +1,22 @@
+{
+  "arbiter": [
+    {
+      "entity": "exception",
+      "id": "e1",
+      "key": "exception_pending:e1:20",
+      "kind": "exception_pending",
+      "position": 20,
+      "title": "ILLEGAL_TRANSITION on task.reassigned t1"
+    }
+  ],
+  "operator": [
+    {
+      "entity": "exception",
+      "id": "e1",
+      "key": "exception_pending:e1:20",
+      "kind": "exception_pending",
+      "position": 20,
+      "title": "ILLEGAL_TRANSITION on task.reassigned t1"
+    }
+  ]
+}

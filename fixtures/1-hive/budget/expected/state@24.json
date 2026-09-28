@@ -1,0 +1,272 @@
+{
+  "actors": {
+    "coord": {
+      "class": "coordinator",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:coord"
+      },
+      "id": "coord",
+      "keys": [
+        "ed25519:IHkWTNzUAL4iIC5Xh8IR_7NhRQzNYVR7fcmRTot33UQ"
+      ],
+      "registered_at": "2026-09-01T12:04:00.000000Z",
+      "revoked_keys": [],
+      "role": "coordinator",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 5
+    },
+    "cos": {
+      "class": "chief_of_staff",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:cos"
+      },
+      "id": "cos",
+      "keys": [
+        "ed25519:MfIYYvD_sf_QOVMTbV8YQBcPERDjG3hUdVnyVNrQCNQ"
+      ],
+      "registered_at": "2026-09-01T12:02:00.000000Z",
+      "revoked_keys": [],
+      "role": "chief_of_staff",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 3
+    },
+    "op": {
+      "class": "operator",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:op"
+      },
+      "id": "op",
+      "keys": [
+        "ed25519:6VHGeFQf2CDONTn_-g96H_QjBYGefjQbf5s0B3PprcQ"
+      ],
+      "registered_at": "2026-09-01T12:00:00.000000Z",
+      "revoked_keys": [],
+      "role": "owner",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 1
+    },
+    "rv1": {
+      "class": "reviewer",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:rv1"
+      },
+      "id": "rv1",
+      "keys": [
+        "ed25519:IcXubcT-xRq0Aj8QduE1n-e9HyGLTnhnINt-vW3foAc"
+      ],
+      "registered_at": "2026-09-01T12:07:00.000000Z",
+      "revoked_keys": [],
+      "role": "reviewer",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 8
+    },
+    "rv2": {
+      "class": "reviewer",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:rv2"
+      },
+      "id": "rv2",
+      "keys": [
+        "ed25519:sVjJ1HCkx0KNWQHV8CDEnbABulu6e7NGKmFsSwhrOVk"
+      ],
+      "registered_at": "2026-09-01T12:08:00.000000Z",
+      "revoked_keys": [],
+      "role": "reviewer",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 9
+    },
+    "sup": {
+      "class": "supervisor",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:sup"
+      },
+      "id": "sup",
+      "keys": [
+        "ed25519:yq5q4ednNpBI3gS_ujWCrWGrqHQdT2lM8PYXAo7R2Tg"
+      ],
+      "registered_at": "2026-09-01T12:03:00.000000Z",
+      "revoked_keys": [],
+      "role": "supervisor",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 4
+    },
+    "w1": {
+      "class": "worker",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:w1"
+      },
+      "id": "w1",
+      "keys": [
+        "ed25519:4Otc5uqVcJkqsp24Q73KPqK6UTUF7uKA6HGtuDiqZH8"
+      ],
+      "registered_at": "2026-09-01T12:05:00.000000Z",
+      "revoked_keys": [],
+      "role": "worker",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 6
+    },
+    "w2": {
+      "class": "worker",
+      "declaration": {
+        "harness": "fixture",
+        "model_route": "none",
+        "sandbox": "fixture:w2"
+      },
+      "id": "w2",
+      "keys": [
+        "ed25519:sZYNZMmTtdx_E5u9TDlpRTdxrfTZXwA9HeKD0ciRSy8"
+      ],
+      "registered_at": "2026-09-01T12:06:00.000000Z",
+      "revoked_keys": [],
+      "role": "worker",
+      "role_prompt": null,
+      "status": "active",
+      "status_since": 7
+    }
+  },
+  "exceptions": {},
+  "goals": {
+    "g1": {
+      "approved_at": "2026-09-01T12:11:00.000000Z",
+      "budget": {
+        "tokens": 100000,
+        "usd_micros": 400000
+      },
+      "escalation": null,
+      "goal_pin": {
+        "commit_oid": "sha1:04b79e035df5feb13ab1be973c4a77e59fe85984",
+        "content_digest": "sha256:373528f3a270e62368346334994314a8fdffa6af384eb5195ca43bdfbcfe535f",
+        "kind": "file",
+        "mode": "100644",
+        "object_oid": "sha1:3c64b20ada5fe16235974629b7a1e31b60a941a6",
+        "path": "content/goal-2.md",
+        "repository": "fixture",
+        "version": 1
+      },
+      "id": "g1",
+      "objective": "Ship the thing",
+      "outcome": null,
+      "project": "p1",
+      "proposed_at": "2026-09-01T12:10:00.000000Z",
+      "proposed_by": "cos",
+      "relevance": "Useless if the thing is not used",
+      "spent": {
+        "tokens": 40000,
+        "usd_micros": 200000
+      },
+      "status": "active",
+      "status_since": 12,
+      "summary": null,
+      "title": "Goal one, narrowed",
+      "violations": 0
+    }
+  },
+  "hive": {
+    "gateway": {
+      "position": 2,
+      "registry_digest": "sha256:63b37a9c21a4f07c2760bcab977d192674536969da66b6f95e55a81f7783854f",
+      "since": "2026-09-01T12:01:00.000000Z",
+      "source_commit": "0000000000000000000000000000000000000000",
+      "version": "fixture"
+    },
+    "head": 24,
+    "hive": "fixture",
+    "mode": "authoritative",
+    "policy": {
+      "commit_oid": "sha1:04b79e035df5feb13ab1be973c4a77e59fe85984",
+      "content_digest": "sha256:4f71e3be3e92b675d6b740919026587eb4ca9ae4392dca65014a5299c46c7f23",
+      "kind": "tree",
+      "object_oid": "sha1:fb205d98e7c26657ddd0402fdba6983245c8d74a",
+      "path": "policy",
+      "repository": "fixture",
+      "version": 1
+    },
+    "profile": "1-hive",
+    "registry_digest": "sha256:63b37a9c21a4f07c2760bcab977d192674536969da66b6f95e55a81f7783854f"
+  },
+  "projects": {
+    "p1": {
+      "id": "p1",
+      "opened_at": "2026-09-01T12:09:00.000000Z",
+      "status": "open",
+      "status_since": 10,
+      "title": "Project one"
+    }
+  },
+  "tasks": {
+    "t1": {
+      "assigned_at": "2026-09-01T12:17:00.000000Z",
+      "assigned_reviewer": null,
+      "block": null,
+      "created_at": "2026-09-01T12:16:00.000000Z",
+      "created_by": "cos",
+      "current_result": null,
+      "exceptions_applied": 0,
+      "ext": {
+        "attempt": 1,
+        "escalation": null,
+        "kind": "work",
+        "lease": {
+          "accept_within_seconds": 600,
+          "checkin_every_seconds": 900
+        },
+        "nudges_since_activity": 0,
+        "restarts": 0,
+        "reviews_task": null,
+        "spent": {
+          "tokens": 40000,
+          "usd_micros": 200000,
+          "wall_clock_seconds": 600
+        }
+      },
+      "goal": "g1",
+      "id": "t1",
+      "last_activity": {
+        "at": "2026-09-01T12:20:00.000000Z",
+        "position": 21
+      },
+      "latest_review": null,
+      "order": {
+        "commit_oid": "sha1:04b79e035df5feb13ab1be973c4a77e59fe85984",
+        "content_digest": "sha256:b2dde536a6f1aa0dbf24160f57dcabb606df084e9493a948b3e452eda3535132",
+        "kind": "file",
+        "mode": "100644",
+        "object_oid": "sha1:aba69487b4edfcb3a93bc36dd1a12e77986d4208",
+        "path": "content/order-1.md",
+        "repository": "fixture",
+        "version": 1
+      },
+      "owner": "w1",
+      "project": "p1",
+      "reassignments": 0,
+      "results_count": 0,
+      "reviews_failed_count": 0,
+      "revision": 5,
+      "status": "in_progress",
+      "status_since": 19,
+      "title": "Build it",
+      "violations": 0
+    }
+  }
+}

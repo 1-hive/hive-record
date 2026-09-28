@@ -1,0 +1,26 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/profiles/1-hive/schemas/ext/task.reported.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "usd_micros": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wall_clock_seconds": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

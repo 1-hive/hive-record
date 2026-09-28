@@ -1,0 +1,42 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/profiles/1-hive/schemas/ext/task.created.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "work",
+        "review"
+      ]
+    },
+    "reviews_task": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64
+    }
+  },
+  "if": {
+    "properties": {
+      "kind": {
+        "const": "review"
+      }
+    },
+    "required": [
+      "kind"
+    ]
+  },
+  "then": {
+    "required": [
+      "reviews_task"
+    ]
+  },
+  "else": {
+    "not": {
+      "required": [
+        "reviews_task"
+      ]
+    }
+  }
+}

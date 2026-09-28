@@ -1,0 +1,13 @@
+{
+  "arbiter": [],
+  "operator": [
+    {
+      "entity": "task",
+      "id": "t2",
+      "key": "task_review_unassigned:t2:48",
+      "kind": "task_review_unassigned",
+      "position": 48,
+      "title": "Task t2"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "arbiter": [],
+  "chief_of_staff": [
+    {
+      "entity": "task",
+      "id": "t1",
+      "key": "escalation_open:t1:16",
+      "kind": "escalation_open",
+      "position": 16,
+      "title": "question: Build it"
+    }
+  ],
+  "operator": []
+}

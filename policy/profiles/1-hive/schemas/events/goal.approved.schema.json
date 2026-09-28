@@ -1,0 +1,8 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/profiles/1-hive/schemas/events/goal.approved.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {}
+}

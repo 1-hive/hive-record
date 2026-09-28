@@ -1,0 +1,22 @@
+{
+  "arbiter": [],
+  "chief_of_staff": [],
+  "operator": [
+    {
+      "entity": "goal",
+      "id": "g1",
+      "key": "goal_proposed:g1:11",
+      "kind": "goal_proposed",
+      "position": 11,
+      "title": "Goal one"
+    },
+    {
+      "entity": "proposal",
+      "id": "pr1",
+      "key": "proposal_pending:pr1:12",
+      "kind": "proposal_pending",
+      "position": 12,
+      "title": "goal.approved"
+    }
+  ]
+}

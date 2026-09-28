@@ -1,0 +1,23 @@
+{
+  "arbiter": [
+    {
+      "entity": "exception",
+      "id": "x1",
+      "key": "exception_pending:x1:44",
+      "kind": "exception_pending",
+      "position": 44,
+      "title": "ILLEGAL_TRANSITION on task.answered t1"
+    }
+  ],
+  "chief_of_staff": [],
+  "operator": [
+    {
+      "entity": "exception",
+      "id": "x1",
+      "key": "exception_pending:x1:44",
+      "kind": "exception_pending",
+      "position": 44,
+      "title": "ILLEGAL_TRANSITION on task.answered t1"
+    }
+  ]
+}

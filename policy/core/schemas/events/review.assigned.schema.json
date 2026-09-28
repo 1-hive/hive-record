@@ -1,0 +1,25 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/core/schemas/events/review.assigned.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reviewer",
+    "result_event"
+  ],
+  "properties": {
+    "reviewer": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64
+    },
+    "result_event": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "maxLength": 36
+    },
+    "ext": {
+      "type": "object"
+    }
+  }
+}

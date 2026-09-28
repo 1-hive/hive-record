@@ -1,0 +1,539 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/1-hive/hive-record/schemas/legality-table-v1.schema.json",
+  "title": "hive.legality/1 (SPEC \u00a711)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "classes",
+    "rels",
+    "codes",
+    "waivable_codes",
+    "entities",
+    "inbox",
+    "rules"
+  ],
+  "properties": {
+    "schema": {
+      "const": "hive.legality/1"
+    },
+    "version": {
+      "type": "string"
+    },
+    "classes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+        "maxLength": 64
+      }
+    },
+    "rels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "maxLength": 64
+      }
+    },
+    "codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]*$",
+        "maxLength": 64
+      }
+    },
+    "entities": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "collection",
+          "id",
+          "state_field",
+          "states",
+          "terminal",
+          "unknown_code",
+          "exists_code",
+          "illegal_code",
+          "mirrorable"
+        ],
+        "properties": {
+          "collection": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(task|goal|data\\.[a-z_]+)$"
+          },
+          "state_field": {
+            "type": "string"
+          },
+          "states": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+              "maxLength": 64
+            }
+          },
+          "terminal": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+              "maxLength": 64
+            }
+          },
+          "unknown_code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "maxLength": 64
+          },
+          "exists_code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "maxLength": 64
+          },
+          "illegal_code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "maxLength": 64
+          },
+          "mirrorable": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "inbox": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "event",
+          "entity",
+          "classes",
+          "relation",
+          "from",
+          "to",
+          "refs",
+          "conditions",
+          "effects"
+        ],
+        "properties": {
+          "event": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$",
+            "maxLength": 64
+          },
+          "entity": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+            "maxLength": 64
+          },
+          "classes": {
+            "oneOf": [
+              {
+                "const": "*"
+              },
+              {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+                  "maxLength": 64
+                }
+              }
+            ]
+          },
+          "relation": {
+            "enum": [
+              null,
+              "owner",
+              "self",
+              "proposer",
+              "requester"
+            ]
+          },
+          "from": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "enum": [
+                  "*",
+                  "open"
+                ]
+              },
+              {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+                  "maxLength": 64
+                }
+              }
+            ]
+          },
+          "to": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "by",
+                  "map"
+                ],
+                "properties": {
+                  "by": {
+                    "type": "string"
+                  },
+                  "map": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+                      "maxLength": 64
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "refs": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "required",
+              "allowed"
+            ],
+            "properties": {
+              "required": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$",
+                  "maxLength": 64
+                }
+              },
+              "allowed": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$",
+                  "maxLength": 64
+                }
+              }
+            }
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "name"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "args": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "effects": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "exceptable": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "waivable_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]*$",
+        "maxLength": 64
+      }
+    }
+  },
+  "$defs": {
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event",
+        "entity",
+        "classes",
+        "relation",
+        "from",
+        "to",
+        "refs",
+        "conditions",
+        "effects"
+      ],
+      "properties": {
+        "event": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$",
+          "maxLength": 64
+        },
+        "entity": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "maxLength": 64
+        },
+        "classes": {
+          "oneOf": [
+            {
+              "const": "*"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+                "maxLength": 64
+              }
+            }
+          ]
+        },
+        "relation": {
+          "enum": [
+            null,
+            "owner",
+            "self",
+            "proposer",
+            "requester"
+          ]
+        },
+        "from": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "enum": [
+                "*",
+                "open"
+              ]
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+                "maxLength": 64
+              }
+            }
+          ]
+        },
+        "to": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "by",
+                "map"
+              ],
+              "properties": {
+                "by": {
+                  "type": "string"
+                },
+                "map": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+                    "maxLength": 64
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "refs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required",
+            "allowed"
+          ],
+          "properties": {
+            "required": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$",
+                "maxLength": 64
+              }
+            },
+            "allowed": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$",
+                "maxLength": 64
+              }
+            }
+          }
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "args": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "exceptable": {
+          "type": "boolean"
+        }
+      }
+    },
+    "entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "collection",
+        "id",
+        "state_field",
+        "states",
+        "terminal",
+        "unknown_code",
+        "exists_code",
+        "illegal_code",
+        "mirrorable"
+      ],
+      "properties": {
+        "collection": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(task|goal|data\\.[a-z_]+)$"
+        },
+        "state_field": {
+          "type": "string"
+        },
+        "states": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+            "maxLength": 64
+          }
+        },
+        "terminal": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+            "maxLength": 64
+          }
+        },
+        "unknown_code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "maxLength": 64
+        },
+        "exists_code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "maxLength": 64
+        },
+        "illegal_code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "maxLength": 64
+        },
+        "mirrorable": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

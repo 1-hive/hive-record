@@ -1,0 +1,16 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/profiles/1-hive/schemas/events/proposal.approved.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "proposal_id"
+  ],
+  "properties": {
+    "proposal_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64
+    }
+  }
+}

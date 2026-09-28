@@ -1,0 +1,26 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/profiles/1-hive/schemas/ext/task.reassigned.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "lease": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "accept_within_seconds",
+        "checkin_every_seconds"
+      ],
+      "properties": {
+        "accept_within_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "checkin_every_seconds": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

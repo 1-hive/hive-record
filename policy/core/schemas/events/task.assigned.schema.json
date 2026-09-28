@@ -1,0 +1,19 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/core/schemas/events/task.assigned.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "to"
+  ],
+  "properties": {
+    "to": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64
+    },
+    "ext": {
+      "type": "object"
+    }
+  }
+}

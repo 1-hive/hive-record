@@ -1,0 +1,13 @@
+{
+  "arbiter": [],
+  "operator": [
+    {
+      "entity": "task",
+      "id": "t1",
+      "key": "task_passed_not_closed:t1:16",
+      "kind": "task_passed_not_closed",
+      "position": 16,
+      "title": "Task t1"
+    }
+  ]
+}

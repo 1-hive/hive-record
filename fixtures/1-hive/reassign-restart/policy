@@ -1,0 +1,10 @@
+The policy tree is the fixture repository's policy/ (fixtures/make-repo.sh), pinned as:
+{
+  "commit_oid": "sha1:04b79e035df5feb13ab1be973c4a77e59fe85984",
+  "content_digest": "sha256:4f71e3be3e92b675d6b740919026587eb4ca9ae4392dca65014a5299c46c7f23",
+  "kind": "tree",
+  "object_oid": "sha1:fb205d98e7c26657ddd0402fdba6983245c8d74a",
+  "path": "policy",
+  "repository": "fixture",
+  "version": 1
+}
