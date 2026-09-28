@@ -1,7 +1,8 @@
 # One Hive R1 + R2: The Hive Record — Specification
 
-**Status:** draft v1 for review (not frozen)
-**Version:** 1.0-draft.5 · 2026-09-28
+**Status:** Frozen · implemented by the reference implementation [`hiverecord`](src/hiverecord)
+**Version:** 1.0 · 2026-09-28
+**Changes:** after freezing, any change is an explicit, numbered v1 amendment (Appendix D), never a silent edit. Anything that would weaken a core invariant (§5) needs a new major version.
 **Releases:** R1 (the record), R2 (legality table and review-gated close)
 **Depends on:** R0 pinning spec v1.0 (`hivepin` 1.0.0)
 **Primary consumers:** any hive adopting the record; the 1-hive operating loop (launcher, supervisor, triage, chief of staff); R3 projections; R5 review harness; R6 worker runtime; R7 messaging; R9 replay.
@@ -939,7 +940,7 @@ The core inbox's operator items move to the chief of staff: in this profile, hum
 
 ## Appendix C. Changes in draft.5 (2026-09-28)
 
-- **Exceptions** (§12.6, invariant 10), in answer to Ben's question whether a deterministic ruleset is enough. Rules keep deciding coordination moves; judgment stays with actors (reviewers, triage, chief of staff, humans) whose signed verdicts the rules require. For moves the rules wrongly forbid, a refused request can be admitted exactly as sent after a recorded grant by an operator or `arbiter`. Only waivable codes on exceptable rules can be waived; authentication, authority, pins and review gating never can. Agents can advise in shadow before being promoted to arbiter.
+- **Exceptions** (§12.6, invariant 10), in answer to the question whether a deterministic ruleset is enough. Rules keep deciding coordination moves; judgment stays with actors (reviewers, triage, chief of staff, humans) whose signed verdicts the rules require. For moves the rules wrongly forbid, a refused request can be admitted exactly as sent after a recorded grant by an operator or `arbiter`. Only waivable codes on exceptable rules can be waived; authentication, authority, pins and review gating never can. Agents can advise in shadow before being promoted to arbiter.
 - New core class `arbiter`, entity `exception`, five `exception.*` events, the `requester` relation, the `exceptable` rule flag, and extension fields `forbid_exceptions` and `waivable_codes`.
 - **From implementing it** (reference implementation):
   - `rationale` moved from the `1-hive` profile to the core rels, since the core `exception.*` events use it (§8, §24.2).
@@ -948,3 +949,7 @@ The core inbox's operator items move to the chief of staff: in this profile, hum
   - The waived code is waived wherever it arises in steps 5–6, not only at its first occurrence (§12.6).
   - The core table lists the core waivable codes as `waivable_codes` (§11.1, §12.6).
   - The `1-hive` inbox also gives `arbiter` its `exception_pending` items, because a profile's inbox replaces the core one (§26).
+
+## Appendix D. Amendments to v1.0
+
+None yet. Each amendment gets a number (A1, A2, …), a date, the sections it changes, and whether it is a clarification or a behavior change. Implementations state which amendments they support.

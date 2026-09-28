@@ -4,6 +4,8 @@
 
 First implementation of SPEC v1.0-draft.5 (R1 + R2).
 
+- **`SPEC.md` frozen as v1.0** (2026-09-28). Later changes are numbered amendments in its Appendix D.
+
 - `SPEC.md` draft.4: signing over canonical body bytes, integer-only numbers (`usd_micros`), bootstrap registering the first operator, proposal application details, registry digest, precise mirror-mode scope, explicit table format, state and fixture format (Appendix B).
 - `SPEC.md` draft.5: the exception path (§12.6): `arbiter` class, `exception` entity and events, `exceptable` rules and waivable codes; a grant admits the exact refused request under its original signature.
 - `schemas/`: request, envelope, legality table and profile schemas.
