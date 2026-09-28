@@ -29,7 +29,7 @@ Homepage = "https://github.com/1-hive/hive-record"
 Specification = "https://github.com/1-hive/hive-record/blob/main/SPEC.md"
 
 [project.optional-dependencies]
-test = ["pytest>=8", "hypothesis>=6"]
+test = ["pytest>=8", "hypothesis>=6", "httpx2>=2.13"]
 
 [dependency-groups]
 dev = ["ruff>=0.6"]
