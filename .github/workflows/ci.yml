@@ -1,0 +1,13 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv venv -p 3.12 && uv pip install -e ".[test]" ruff
+      - run: uv run ruff check src tests fixtures
+      - run: |
+          git config --global user.name ci && git config --global user.email ci@example.invalid
+          uv run pytest
