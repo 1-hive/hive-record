@@ -31,6 +31,9 @@ Specification = "https://github.com/1-hive/hive-record/blob/main/SPEC.md"
 [project.optional-dependencies]
 test = ["pytest>=8", "hypothesis>=6"]
 
+[dependency-groups]
+dev = ["ruff>=0.6"]
+
 [tool.uv.sources]
 hivepin = { git = "https://github.com/1-hive/hive-pin" }
 
