@@ -1,0 +1,91 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/core/schemas/events/route.waiting.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task",
+    "attempt",
+    "mode",
+    "table",
+    "decision",
+    "computed_tier",
+    "log"
+  ],
+  "properties": {
+    "task": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64
+    },
+    "attempt": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "live",
+        "fixed"
+      ]
+    },
+    "table": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "maxLength": 71
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "wait",
+        "no_route",
+        "reconcile"
+      ]
+    },
+    "computed_tier": {
+      "type": "string",
+      "enum": [
+        "local",
+        "light",
+        "standard",
+        "strong"
+      ]
+    },
+    "wait_until": {
+      "type": "string",
+      "format": "date-time",
+      "maxLength": 40
+    },
+    "rules": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z][A-Za-z0-9_]{0,15}$",
+        "maxLength": 16
+      },
+      "uniqueItems": true
+    },
+    "log": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seq",
+        "digest"
+      ],
+      "description": "The router's full, replayable entry for this event: its seq in the router's log and the SHA-256 of its canonical line.",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "maxLength": 71
+        }
+      }
+    }
+  }
+}

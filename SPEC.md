@@ -245,7 +245,7 @@ Fields are in `data`. "pin(rel)" means a ref with that rel. Each type has a JSON
 | `gateway.started` | `version`; `source_commit`; `policy_digest`; `registry_digest` (of the registry the gateway loaded) | — | no |
 | `gateway.rejected` | `code`; `reason`; `retryable`; `by` {id, class}; `via`?; `refused` (the request if it parsed as a JSON object within the size limit, else null); `refused_digest`; `refused_size`; `detail` {} | — | no |
 
-Type names outside the active profile's catalog are refused (`UNKNOWN_EVENT_TYPE`). The prefixes `message.`, `skill.`, `route.`, `trial.` and `memory.` are reserved for R4–R10 and must not be used by extensions.
+Type names outside the active profile's catalog are refused (`UNKNOWN_EVENT_TYPE`). The prefixes `message.`, `skill.`, `route.`, `trial.` and `memory.` are reserved for R4–R10 and must not be used by extensions. Amendment A1 admits the `route.` family to the core (Appendix D).
 
 ## 10. Policy trees
 
@@ -952,4 +952,23 @@ The core inbox's operator items move to the chief of staff: in this profile, hum
 
 ## Appendix D. Amendments to v1.0
 
-None yet. Each amendment gets a number (A1, A2, …), a date, the sections it changes, and whether it is a clarification or a behavior change. Implementations state which amendments they support.
+Each amendment gets a number (A1, A2, …), a date, the sections it changes, and whether it is a clarification or a behavior change. Implementations state which amendments they support.
+
+### A1. The `route.` family (routing, R8)
+
+**Date:** 2026-09-29. **Changes:** §9 (catalog), §11 (core rules); core legality table version 1.1.0. **Kind:** behavior change, additive: new event types only; no existing rule, state or invariant changes.
+
+A router (R8, `hive-route`) records its decisions on the record, as an actor of class `instrument` with its own key. Six event types, all on the `hive` entity, from any state to the same state, with no refs, conditions or effects, so routing never touches task state:
+
+| Type | Classes | Data |
+|---|---|---|
+| `route.table_pinned` | instrument, operator | `table` (sha256 of the route table), optional `version`, `log` |
+| `route.mode_set` | instrument, operator | `mode` (`live`, `fixed`), `table`, `log` |
+| `route.decided` | instrument | `task`, `attempt`, `mode`, `table`, `tier`, `computed_tier`, `route_id`, `route_pin`, `pool`, `model`, optional `harness`, `effort`, `facts` (the four facts' values, and which were `estimated`), `rules` (the ids of the rules that applied), `log` |
+| `route.waiting` | instrument | `task`, `attempt`, `mode`, `table`, `decision` (`wait`, `no_route`, `reconcile`), `computed_tier`, optional `wait_until`, `rules`, `log` |
+| `route.canary_recorded` | instrument | `route_id`, `route_pin`, `status`, `suite`, `suite_pin`, `passed`, `cases`, `lesson`, `log` |
+| `route.drift_detected` | instrument | `route_id`, `route_pin`, `attempt`, optional `task`, `pinned_model`, `observed_models`, `log` |
+
+- **Task ids go in `data`, not the envelope.** The envelope's `task` is refused (`SCHEMA_INVALID`), since these events are not task transitions; the id is informational and needn't name a task on the record.
+- **`log` binds the full decision.** A routing decision replays only with its full request, state and table, which exceed the 8 KiB `data` limit (§7.4). The router keeps them in its own append-only log; `log` gives the entry's `seq` there and the SHA-256 of its canonical line, so the record's summary is bound to the replayable entry.
+- **Extensions** still may not use the `route.` prefix (§13.1): the family is defined here, once.

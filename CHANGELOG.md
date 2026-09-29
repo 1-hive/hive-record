@@ -2,6 +2,8 @@
 
 ## [Unreleased] — 1.0.0.dev0
 
+- **Amendment A1** (2026-09-29): the `route.` family (SPEC Appendix D) for the router (R8): `route.table_pinned`, `route.mode_set`, `route.decided`, `route.waiting`, `route.canary_recorded`, `route.drift_detected`, recorded by an `instrument`. Core legality table 1.1.0; fixture `core/routing`; every fixture rebuilt for the new policy pin.
+
 First implementation of SPEC v1.0-draft.5 (R1 + R2).
 
 - **`SPEC.md` frozen as v1.0** (2026-09-28). Later changes are numbered amendments in its Appendix D.

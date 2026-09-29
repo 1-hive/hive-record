@@ -1,0 +1,45 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/core/schemas/events/route.mode_set.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mode",
+    "table",
+    "log"
+  ],
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "live",
+        "fixed"
+      ]
+    },
+    "table": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "maxLength": 71
+    },
+    "log": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seq",
+        "digest"
+      ],
+      "description": "The router's full, replayable entry for this event: its seq in the router's log and the SHA-256 of its canonical line.",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "maxLength": 71
+        }
+      }
+    }
+  }
+}

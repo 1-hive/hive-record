@@ -558,6 +558,47 @@ GOAL = {"project": "p1", "title": "Goal one", "objective": "Ship the thing",
         "relevance": "Useless if the thing is not used", "budget": {"usd_micros": 5_000_000, "tokens": 1_000_000}}
 
 
+def routing(fx: FixtureRepo) -> Scenario:
+    """Amendment A1: the router (an instrument) records its decisions; no one else can."""
+    s = Scenario(fx)
+    core_setup(s)
+    sha = "sha256:" + "ab" * 32
+
+    def log(n: int) -> dict:
+        return {"seq": n, "digest": "sha256:" + f"{n:02x}" * 32}
+
+    s.req("inst", "route.table_pinned", data={"table": sha, "version": 3, "log": log(1)})
+    s.req("op", "route.mode_set", data={"mode": "fixed", "table": sha, "log": log(2)})
+    decided = {"task": "t1", "attempt": "t1.worker.0", "mode": "fixed", "table": sha,
+               "tier": "strong", "computed_tier": "strong", "route_id": "opus-plan",
+               "route_pin": "sha256:" + "cd" * 32, "pool": "claude-plan", "model": "claude-opus-5-5",
+               "harness": "claude-code",
+               "facts": {"specification": "partial", "scope": "few", "estimated": ["scope"]},
+               "rules": ["F1", "F2", "F5", "fixed"], "log": log(3)}
+    s.req("inst", "route.decided", data=decided)
+    s.req("inst", "route.waiting", data={
+        "task": "t2", "attempt": "t2.worker.0", "mode": "live", "table": sha, "decision": "wait",
+        "computed_tier": "light", "wait_until": "2026-09-01T17:00:00Z", "rules": ["RT3"], "log": log(4)})
+    s.req("inst", "route.canary_recorded", data={
+        "route_id": "opus-plan", "route_pin": "sha256:" + "cd" * 32, "status": "qualified",
+        "suite": "starter", "suite_pin": "sha256:" + "ef" * 32, "passed": 5, "cases": 5,
+        "lesson": "5/5 cases passed", "log": log(5)})
+    s.req("inst", "route.drift_detected", data={
+        "route_id": "opus-plan", "route_pin": "sha256:" + "cd" * 32, "attempt": "t1.worker.0",
+        "task": "t1", "pinned_model": "claude-opus-5-5", "observed_models": ["claude-opus-5-6"],
+        "log": log(6)})
+    s.snapshot()
+    # only the router records routing; routing never touches task state
+    s.req("w1", "route.decided", data=decided, expect="NOT_AUTHORIZED")
+    s.req("coord", "route.mode_set", data={"mode": "live", "table": sha, "log": log(7)},
+          expect="NOT_AUTHORIZED")
+    s.req("inst", "route.decided", task="t1", data=decided, expect="SCHEMA_INVALID")
+    s.req("inst", "route.decided", data={**decided, "tier": "huge"}, expect="SCHEMA_INVALID")
+    s.req("inst", "route.decided", data={k: v for k, v in decided.items() if k != "log"},
+          expect="SCHEMA_INVALID")
+    return s
+
+
 def hive1_setup(s: Scenario) -> None:
     s.init()
     s.register("cos", "chief_of_staff")
@@ -793,6 +834,7 @@ SCENARIOS = {
     "core/mode-flip": mode_flip,
     "core/exception": exception,
     "core/refusals": core_refusals,
+    "core/routing": routing,
     "1-hive/goal-happy-path": goal_happy_path,
     "1-hive/proposals": proposals,
     "1-hive/escalations": escalations,

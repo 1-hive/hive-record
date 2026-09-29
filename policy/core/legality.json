@@ -1,6 +1,6 @@
 {
   "schema": "hive.legality/1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "classes": ["operator", "coordinator", "worker", "reviewer", "instrument", "arbiter", "gateway"],
   "rels": ["order", "question", "answer", "result", "review", "report", "policy", "role_prompt", "rationale"],
   "codes": ["SCHEMA_INVALID", "UNSUPPORTED_SCHEMA", "UNKNOWN_EVENT_TYPE", "PAYLOAD_TOO_LARGE", "STALE_GENERATION", "STALE_REVISION", "IDEMPOTENCY_CONFLICT", "KEY_EXISTS", "UNKNOWN_KEY", "NOT_AUTHORIZED", "NOT_OWNER", "UNKNOWN_ACTOR", "ACTOR_RETIRED", "ACTOR_EXISTS", "UNKNOWN_PROJECT", "PROJECT_EXISTS", "PROJECT_NOT_OPEN", "PROJECT_HAS_OPEN_WORK", "UNKNOWN_TASK", "TASK_EXISTS", "ILLEGAL_TRANSITION", "INVALID_ASSIGNEE", "NOT_ANSWERED", "REF_MISSING", "REF_NOT_ALLOWED", "PIN_INVALID", "PIN_UNAVAILABLE", "POLICY_INVALID", "REVIEW_REQUIRED", "REVIEW_STALE", "REVIEW_NOT_INDEPENDENT", "REVIEW_NOT_ASSIGNED", "LAST_OPERATOR", "UNKNOWN_EXCEPTION", "EXCEPTION_EXISTS", "EXCEPTION_NOT_PENDING", "REFUSAL_MISMATCH", "NOT_EXCEPTABLE", "EXCEPTION_NOT_APPLICABLE", "INTERNAL_ERROR"],
@@ -49,6 +49,12 @@
     {"event": "exception.advised", "entity": "exception", "classes": ["arbiter", "coordinator", "instrument"], "relation": null, "from": ["pending"], "to": "same", "refs": {"required": [], "allowed": ["rationale"]}, "conditions": ["not_requester"], "effects": ["record_advice"]},
     {"event": "exception.granted", "entity": "exception", "classes": ["operator", "arbiter"], "relation": null, "from": ["pending"], "to": "granted", "refs": {"required": [], "allowed": ["rationale"]}, "conditions": ["not_requester", "exception_applicable"], "effects": ["decide_exception"]},
     {"event": "exception.denied", "entity": "exception", "classes": ["operator", "arbiter"], "relation": null, "from": ["pending"], "to": "denied", "refs": {"required": [], "allowed": ["rationale"]}, "conditions": ["not_requester"], "effects": ["decide_exception"]},
-    {"event": "exception.withdrawn", "entity": "exception", "classes": "*", "relation": "requester", "from": ["pending"], "to": "withdrawn", "refs": {"required": [], "allowed": []}, "conditions": [], "effects": ["decide_exception"]}
+    {"event": "exception.withdrawn", "entity": "exception", "classes": "*", "relation": "requester", "from": ["pending"], "to": "withdrawn", "refs": {"required": [], "allowed": []}, "conditions": [], "effects": ["decide_exception"]},
+    {"event": "route.table_pinned", "entity": "hive", "classes": ["instrument", "operator"], "relation": null, "from": "*", "to": "same", "refs": {"required": [], "allowed": []}, "conditions": [], "effects": []},
+    {"event": "route.mode_set", "entity": "hive", "classes": ["instrument", "operator"], "relation": null, "from": "*", "to": "same", "refs": {"required": [], "allowed": []}, "conditions": [], "effects": []},
+    {"event": "route.decided", "entity": "hive", "classes": ["instrument"], "relation": null, "from": "*", "to": "same", "refs": {"required": [], "allowed": []}, "conditions": [], "effects": []},
+    {"event": "route.waiting", "entity": "hive", "classes": ["instrument"], "relation": null, "from": "*", "to": "same", "refs": {"required": [], "allowed": []}, "conditions": [], "effects": []},
+    {"event": "route.canary_recorded", "entity": "hive", "classes": ["instrument"], "relation": null, "from": "*", "to": "same", "refs": {"required": [], "allowed": []}, "conditions": [], "effects": []},
+    {"event": "route.drift_detected", "entity": "hive", "classes": ["instrument"], "relation": null, "from": "*", "to": "same", "refs": {"required": [], "allowed": []}, "conditions": [], "effects": []}
   ]
 }

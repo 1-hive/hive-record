@@ -1,0 +1,80 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/core/schemas/events/route.canary_recorded.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "route_id",
+    "route_pin",
+    "status",
+    "suite",
+    "suite_pin",
+    "passed",
+    "cases",
+    "lesson",
+    "log"
+  ],
+  "properties": {
+    "route_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64
+    },
+    "route_pin": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "maxLength": 71
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "candidate",
+        "qualified",
+        "retired"
+      ]
+    },
+    "suite": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64
+    },
+    "suite_pin": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "maxLength": 71
+    },
+    "passed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cases": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "lesson": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "log": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seq",
+        "digest"
+      ],
+      "description": "The router's full, replayable entry for this event: its seq in the router's log and the SHA-256 of its canonical line.",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "maxLength": 71
+        }
+      }
+    }
+  }
+}
