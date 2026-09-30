@@ -41,10 +41,19 @@ def _read_pin(text: str) -> dict:
     return load_pin(p.read_text() if p.is_file() else text)
 
 
-def _policy_engine_for(policy_dirs: list[str]):
+def _policy_engine_for(policy_dirs: list[str] | None, registry: str | None = None):
+    """An engine that resolves the policy trees a log pins: from local --policy dirs,
+    and, with --registry, by materializing any other pinned tree through hivepin."""
     from .engine import Engine
     from .pins import PolicyResolver
-    return Engine(PolicyResolver(dirs=[Path(d) for d in policy_dirs]))
+    if not policy_dirs and not registry:
+        raise SystemExit("hive: give --policy DIR (repeatable) or --registry FILE")
+    if not registry:
+        return Engine(PolicyResolver(dirs=[Path(d) for d in policy_dirs or []]))
+    from hivepin import Config, Registry
+    config = Config.load()
+    return Engine(PolicyResolver(dirs=[Path(d) for d in policy_dirs or []], registry=Registry.load(Path(registry)),
+                                 config=config, cache_dir=config.cache_dir / "hiverecord"))
 
 
 def _read_log(path: str) -> list[bytes]:
@@ -204,7 +213,7 @@ def cmd_export(args) -> None:
 
 
 def cmd_fold(args) -> None:
-    engine = _policy_engine_for(args.policy)
+    engine = _policy_engine_for(args.policy, args.registry)
     for raw in _read_log(args.file):
         ev = loads(raw)
         if args.at is not None and ev["position"] > args.at:
@@ -220,7 +229,7 @@ def cmd_fold(args) -> None:
 
 def cmd_verify_log(args) -> None:
     from .verify import verify_log
-    problems = verify_log(_read_log(args.file), _policy_engine_for(args.policy))
+    problems = verify_log(_read_log(args.file), _policy_engine_for(args.policy, args.registry))
     for p in problems:
         print(p)
     if problems:
@@ -333,8 +342,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("fold", help="fold an exported log without a database")
     s.add_argument("file", help="JSONL export, or - for stdin")
-    s.add_argument("--policy", action="append", required=True, metavar="DIR",
+    s.add_argument("--policy", action="append", metavar="DIR",
                    help="a policy tree the log pins (repeatable); checked against the pin")
+    s.add_argument("--registry", metavar="FILE",
+                   help="hivepin registry: materialize any pinned policy tree not given with --policy")
     s.add_argument("--at", type=int)
     s.add_argument("--board", action="store_true")
     s.add_argument("--project")
@@ -343,7 +354,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("verify-log", help="re-verify every signature in an exported log")
     s.add_argument("file")
-    s.add_argument("--policy", action="append", required=True, metavar="DIR")
+    s.add_argument("--policy", action="append", metavar="DIR",
+                   help="a policy tree the log pins (repeatable)")
+    s.add_argument("--registry", metavar="FILE",
+                   help="hivepin registry: materialize any pinned policy tree not given with --policy")
     s.set_defaults(fn=cmd_verify_log)
 
     s = sub.add_parser("scratch", help="a throwaway Postgres in rootless Podman")
@@ -361,8 +375,12 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> None:
+    from .policy import PolicyError
     args = build_parser().parse_args(argv)
-    args.fn(args)
+    try:
+        args.fn(args)
+    except PolicyError as e:
+        raise SystemExit(f"hive: {e} (pass every policy tree the log pins with --policy, or --registry)") from None
 
 
 if __name__ == "__main__":

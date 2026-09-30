@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hiverecord"
-version = "1.0.0.dev0"
+version = "1.0.0"
 description = "One Hive R1+R2: the hive record - an append-only, signed, policy-gated event log behind a single gateway"
 readme = "README.md"
 requires-python = ">=3.11"

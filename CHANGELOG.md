@@ -1,6 +1,14 @@
 # Changelog
 
-## [Unreleased] — 1.0.0.dev0
+## [1.0.0] — 2026-09-30
+
+Released after its first real adoption: 1-hive, 3 goals and 138 events, every signature re-verifying (`docs/adoption/1-hive.md`). R1 and R2 are done by the release plan's definition.
+
+- `hive fold` and `hive verify-log`: `--registry` materializes the policy trees a log pins, and a missing tree is a clean error instead of a traceback (SPEC amendment A2).
+- SPEC: amendment A1 (`route.` family, core table 1.1.0) and A2 (standalone fold across policy changes).
+- `docs/adoption/1-hive.md` rewritten from a plan into the adoption record.
+
+## 1.0.0.dev0
 
 - **Amendment A1** (2026-09-29): the `route.` family (SPEC Appendix D) for the router (R8): `route.table_pinned`, `route.mode_set`, `route.decided`, `route.waiting`, `route.canary_recorded`, `route.drift_detected`, recorded by an `instrument`. Core legality table 1.1.0; fixture `core/routing`; every fixture rebuilt for the new policy pin.
 

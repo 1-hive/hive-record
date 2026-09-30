@@ -580,7 +580,7 @@ Profiles replace the inbox (§26). An item is `{kind, entity, id, position, titl
 
 ### 16.3 Export and standalone fold
 
-`hive export [--after]` writes canonical JSONL. `hive fold <file> --policy <dir>` computes the state without a database.
+`hive export [--after]` writes canonical JSONL. `hive fold <file> --policy <dir>` computes the state without a database (see A2).
 
 ## 17. Idempotency, basis, generation
 
@@ -972,3 +972,10 @@ A router (R8, `hive-route`) records its decisions on the record, as an actor of 
 - **Task ids go in `data`, not the envelope.** The envelope's `task` is refused (`SCHEMA_INVALID`), since these events are not task transitions; the id is informational and needn't name a task on the record.
 - **`log` binds the full decision.** A routing decision replays only with its full request, state and table, which exceed the 8 KiB `data` limit (§7.4). The router keeps them in its own append-only log; `log` gives the entry's `seq` there and the SHA-256 of its canonical line, so the record's summary is bound to the replayable entry.
 - **Extensions** still may not use the `route.` prefix (§13.1): the family is defined here, once.
+
+### A2. Standalone fold and verification across policy changes
+
+**Date:** 2026-09-30. **Changes:** §16.3. **Kind:** clarification; no protocol, schema or rule change.
+
+A log that contains `hive.policy_changed` pins more than one policy tree, and a standalone fold or verification needs every one of them (§12.4). `hive fold` and `hive verify-log` accept `--policy <dir>` repeatedly, and `--registry <file>`, which materializes through `hivepin` any pinned tree that wasn't given. A tree that can't be resolved is a clean error that names its digest. Found by the 1-hive adoption (`docs/adoption/1-hive.md`).
+
