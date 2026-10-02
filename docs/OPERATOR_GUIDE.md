@@ -44,8 +44,10 @@ The private key file never leaves that sandbox. A worker's sandbox must never ho
 The policy is a git tree pinned with R0 (§10). The canonical v1 tree is `policy/` in this repository. Pin it from a published commit:
 
 ```bash
-hive-pin --json mint hive-record policy > policy.pin
+hive-pin mint hive-record policy --commit <tag-or-sha> --output policy.pin
 ```
+
+This is a v2 pin (a commit, with `policy` as its path), which the gateway requires to carry the path (§10, amendment A3). A v1 tree pin (`--format 1`) is still accepted.
 
 You can also publish your own copy. Extensions may only add or tighten (§13.3); the gateway refuses to load one that loosens.
 

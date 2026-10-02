@@ -14,7 +14,7 @@ import copy
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 
-from hivepin import Pin, PinError
+from hivepin import PinError, pin_from_dict
 
 from . import vocab
 from .canonical import EncodingError, Ids, digest, dumps, format_time, loads, sha256_hex, utcnow
@@ -415,8 +415,12 @@ class Engine:
             extra = [r for r in rels if r not in rule.required + rule.allowed]
             if missing:
                 fail(Refusal("REF_MISSING", f"missing ref {missing[0]}"))
-            elif extra or len(set(rels)) != len(rels):
-                fail(Refusal("REF_NOT_ALLOWED", f"ref {(extra or rels)[0]} is not allowed here"))
+            elif extra:
+                fail(Refusal("REF_NOT_ALLOWED", f"ref {extra[0]} is not allowed here"))
+            else:
+                dup = [r for r in set(rels) if rels.count(r) > 1 and r not in policy.repeatable]
+                if dup:
+                    fail(Refusal("REF_NOT_ALLOWED", f"ref {dup[0]} is not allowed twice"))
         if not soft:
             for name, args in rule.conditions:
                 ctx = vocab.Ctx(state=self.state, policy=policy, rule=rule, req=req, actor=actor,
@@ -442,7 +446,7 @@ class Engine:
         for ref in req["refs"]:
             pin = ref["pin"]
             try:
-                parsed = Pin.from_dict(pin)
+                parsed = pin_from_dict(pin)
             except PinError as exc:
                 raise Refusal("PIN_INVALID", exc.message, hivepin_code=exc.code) from None
             if parsed.to_canonical_dict() != pin:
@@ -453,12 +457,32 @@ class Engine:
                               registry_mismatch=True)
             if self.pins is not None:
                 self.pins(pin)
+        self._check_ancestry(req)
         if req["type"] in ("hive.initialized", "hive.policy_changed"):
             pin = next(r["pin"] for r in req["refs"] if r["rel"] == "policy")
             try:
                 self.resolver(pin, req["data"]["profile"])
             except (PolicyError, PinError, OSError) as exc:
                 raise Refusal("POLICY_INVALID", str(exc)[:500]) from None
+
+    def _check_ancestry(self, req: dict) -> None:
+        """A profile's ancestry checks (amendment A3): each descendant pin must have
+        the ancestor pin of its repository as an ancestor. Admission only, like pin
+        verification: git history is not part of the log, so the fold can't replay it."""
+        checker = getattr(self.pins, "is_ancestor", None)
+        if self.policy is None or checker is None:
+            return
+        for anc_rel, desc_rel, code in self.policy.ancestry:
+            ancestors = {r["pin"].get("repository"): r["pin"] for r in req["refs"] if r["rel"] == anc_rel}
+            for r in req["refs"]:
+                if r["rel"] != desc_rel or r["pin"].get("repository") not in ancestors:
+                    continue
+                anc = ancestors[r["pin"]["repository"]]
+                if anc.get("version") != 2 or r["pin"].get("version") != 2:
+                    continue    # the profile's conditions decide which pin versions it takes
+                if not checker(anc, r["pin"]):
+                    raise Refusal(code, f"{anc_rel} is not an ancestor of {desc_rel} "
+                                        f"in {r['pin']['repository']}")
 
     # --- proposals (SPEC §24.4) --------------------------------------------
     def check_proposed(self, proposed: object) -> tuple[str | None, str]:

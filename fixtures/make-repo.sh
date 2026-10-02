@@ -6,7 +6,8 @@
 #
 # Creates ROOT/fixture.git (bare: the "published" remote, refs/heads/main),
 # ROOT/fixture (a clone: hivepin's local_path) and ROOT/registry.json.
-# The main commit holds policy/ (copied from this repository) and content/*.md.
+# The main commit holds policy/ (copied from this repository) and content/*.md;
+# its parent (main~1) lacks content/code.txt, for base/code pins (amendment A3).
 # A second commit on refs/heads/wip is fetchable but not published.
 # Commit ids are stable for a given policy/ tree, so golden fixtures assume the
 # default ROOT.
@@ -40,6 +41,11 @@ for name in order-1 order-2 order-3 order-4 order-5 order-6 \
 done
 $G -C "$W" add -A
 $G -C "$W" commit -q -m "fixture: policy and content"
+# A3: a second published commit, so main~1 (a base) is an ancestor of main (its code)
+printf 'code change\n' > "$W/content/code.txt"
+chmod 644 "$W/content/code.txt"
+$G -C "$W" add -A
+$G -C "$W" commit -q -m "fixture: code change"
 $G -C "$W" checkout -q -b wip
 printf '# unpublished\n' > "$W/content/unpublished.md"
 chmod 644 "$W/content/unpublished.md"

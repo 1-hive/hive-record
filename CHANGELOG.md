@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.0] — 2026-10-03
+
+Amendment A3 (SPEC Appendix D): R0 pin format v2, and code and base refs on 1-hive results. Needs `hivepin` 2.0.0.
+
+- **Pins:** refs take v1 or v2 pins. A v2 policy pin must carry the policy directory as its path; it is resolved through the registry and re-hashed on every load.
+- **Profiles:** `repeatable_rels` and `ancestry` (admission-only checks that one pin's commit is an ancestor of another's), for an extension's own rels and codes. `schemas/profile-v1.schema.json` gains both as optional fields.
+- **1-hive profile 1.1.0:** `task.created` takes `ext.repos`; `task.result_posted` takes `code` and `base` refs, with the condition `code_matches_repos` and the ancestry check base → code. New codes `CODE_MISSING`, `CODE_OUT_OF_SCOPE`, `CODE_BASE_INVALID`.
+- **Fixtures:** the fixture repository gains a second published commit; every fixture rebuilt; new fixture `1-hive/code-refs`. `FixtureRepo` rebuilds the repository when `make-repo.sh` changes.
+- `gateway.started` reports the loaded policy's tree digest (it read the v1 pin's `content_digest`, which v2 pins lack).
+
 ## [1.0.0] — 2026-09-30
 
 Released after its first real adoption: 1-hive, 3 goals and 138 events, every signature re-verifying (`docs/adoption/1-hive.md`). R1 and R2 are done by the release plan's definition.

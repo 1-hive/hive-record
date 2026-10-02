@@ -823,6 +823,42 @@ def hive1_refusals(fx: FixtureRepo) -> Scenario:
     return s
 
 
+def code_refs(fx: FixtureRepo) -> Scenario:
+    """Amendment A3: a result pins the code it changed (``code``) and where that
+    change started (``base``), for each repository the order names."""
+    s = Scenario(fx, profile="1-hive")
+    hive1_setup(s)
+    active_goal(s)
+    base, tip = fx.pin_v2(None, "main~1"), fx.pin_v2(None, "main")
+    s.req("cos", "task.created", task="t1", goal="g1",
+          data={"title": "Change code", "project": "p1", "ext": {"repos": ["fixture"]}}, refs=[("order", "order-1")])
+    s.req("cos", "task.assigned", task="t1", data={"to": "w1", "ext": LEASE})
+    s.req("w1", "task.accepted", task="t1")
+    s.snapshot()
+    res = ("result", "result-1")
+    s.req("w1", "task.result_posted", task="t1", refs=[res], expect="CODE_MISSING")
+    s.req("w1", "task.result_posted", task="t1", refs=[res, ("code", tip)], expect="CODE_BASE_INVALID")
+    s.req("w1", "task.result_posted", task="t1", refs=[res, ("code", fx.pin_v2("content", "main")), ("base", base)],
+          expect="CODE_BASE_INVALID")                       # a path pin is not a whole commit
+    s.req("w1", "task.result_posted", task="t1", refs=[res, ("code", fx.pin("result-2")), ("base", base)],
+          expect="CODE_BASE_INVALID")                       # a v1 pin
+    s.req("w1", "task.result_posted", task="t1", refs=[res, ("code", base), ("base", tip)],
+          expect="CODE_BASE_INVALID")                       # the base is not an ancestor
+    s.req("w1", "task.result_posted", task="t1", refs=[res, ("result", "result-2"), ("code", tip), ("base", base)],
+          expect="REF_NOT_ALLOWED")                         # only code and base may repeat
+    s.req("w1", "task.result_posted", task="t1", refs=[res, ("code", tip), ("base", base)])
+    s.snapshot()
+    # a task whose order names no repository may not carry code
+    s.req("cos", "task.created", task="t2", goal="g1", data={"title": "Research", "project": "p1"},
+          refs=[("order", "order-2")])
+    s.req("cos", "task.assigned", task="t2", data={"to": "w2", "ext": LEASE})
+    s.req("w2", "task.accepted", task="t2")
+    s.req("w2", "task.result_posted", task="t2", refs=[("result", "result-2"), ("code", tip), ("base", base)],
+          expect="CODE_OUT_OF_SCOPE")
+    s.req("w2", "task.result_posted", task="t2", refs=[("result", "result-2")])
+    return s
+
+
 SCENARIOS = {
     "core/happy-path": happy_path,
     "core/review-loop": review_loop,
@@ -841,6 +877,7 @@ SCENARIOS = {
     "1-hive/reassign-restart": reassign_restart,
     "1-hive/budget": budget,
     "1-hive/refusals": hive1_refusals,
+    "1-hive/code-refs": code_refs,
 }
 
 

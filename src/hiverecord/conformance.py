@@ -36,24 +36,32 @@ class FixtureRepo:
 
     def __init__(self, root: Path = FIXTURE_ROOT, policy_src: Path = REPO / "policy") -> None:
         self.root = Path(root)
+        script = REPO / "fixtures" / "make-repo.sh"
+        stamp = self.root / "make-repo.sha256"
+        want = sha256_hex(script.read_bytes())
         if not (self.root / "registry.json").is_file() or (
             tree_digest(self.root / "fixture" / "policy") != tree_digest(policy_src)
-        ):
-            subprocess.run([str(REPO / "fixtures" / "make-repo.sh"), str(self.root)], check=True,
-                           stdout=subprocess.DEVNULL)
+        ) or not stamp.is_file() or stamp.read_text() != want:
+            subprocess.run([str(script), str(self.root)], check=True, stdout=subprocess.DEVNULL)
+            stamp.write_text(want)
         self.registry_path = self.root / "registry.json"
         self.registry = Registry.load(self.registry_path)
         self.registry_digest = digest(dumps(loads(self.registry_path.read_bytes())))
         self.config = Config(cache_directory=str(self.root / "cache"))
         self.policy_dir = self.root / "fixture" / "policy"
-        self._pins: dict[tuple[str, str], dict] = {}
+        self._pins: dict[tuple, dict] = {}
 
-    def _mint(self, path: str, commit: str) -> dict:
-        key = (path, commit)
+    def _mint(self, path: str | None, commit: str, version: int = 1) -> dict:
+        """The published fixtures use v1 pins; v2 pins are minted on demand."""
+        key = (path, commit, version)
         if key not in self._pins:
-            res = hivepin.mint("fixture", path, self.registry, commit=commit, offline=True, config=self.config)
+            res = hivepin.mint("fixture", path, self.registry, commit=commit, offline=True,
+                               config=self.config, version=version)
             self._pins[key] = res.pin.to_canonical_dict()
         return self._pins[key]
+
+    def pin_v2(self, path: str | None = None, commit: str = "main") -> dict:
+        return self._mint(path, commit, version=2)
 
     def pin(self, name: str) -> dict:
         return self._mint(f"content/{name}.md", "main")

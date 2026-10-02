@@ -107,7 +107,7 @@ class Gateway:
         if self.engine.head == 0:
             raise RuntimeError("the log is empty: run `hive init` first")
         data = {"version": self.cfg.version, "source_commit": self.cfg.source_commit,
-                "policy_digest": self.engine.state["hive"]["policy"]["content_digest"],
+                "policy_digest": self.engine.policy.digest,
                 "registry_digest": self.registry_digest}
         if self.engine.state["hive"]["registry_digest"] != self.registry_digest:
             log.warning("the loaded registry differs from the recorded one; pins will be refused "

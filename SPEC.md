@@ -4,7 +4,7 @@
 **Version:** 1.0 · 2026-09-28
 **Changes:** after freezing, any change is an explicit, numbered v1 amendment (Appendix D), never a silent edit. Anything that would weaken a core invariant (§5) needs a new major version.
 **Releases:** R1 (the record), R2 (legality table and review-gated close)
-**Depends on:** R0 pinning spec v1.0 (`hivepin` 1.0.0)
+**Depends on:** R0 pinning spec v1.0 and, since amendment A3, R0 pin format v2 (`hivepin` 2.0.0)
 **Primary consumers:** any hive adopting the record; the 1-hive operating loop (launcher, supervisor, triage, chief of staff); R3 projections; R5 review harness; R6 worker runtime; R7 messaging; R9 replay.
 
 This document has two parts:
@@ -198,7 +198,7 @@ Each `refs` entry is `{"rel": <rel>, "pin": <canonical R0 pin object>}`. Unknown
 
 For every ref, the gateway MUST:
 1. check that the rel is required or allowed by the effective rule (`REF_MISSING`, `REF_NOT_ALLOWED`);
-2. validate the pin against `pin-v1.schema.json` (`PIN_INVALID`);
+2. validate the pin against `pin-v1.schema.json` or, since amendment A3, `pin-v2.schema.json` (`PIN_INVALID`);
 3. run `hivepin.verify(pin)` with the publication check (not offline) against the hive's repository registry. On failure the refusal is `PIN_INVALID` with `detail.hivepin_code`; if the remote can't be reached it is `PIN_UNAVAILABLE`, which is `retryable: true`.
 
 The registry is a file the gateway loads at start, and `registry_digest` is the sha256 of its canonical JSON. If the loaded registry's digest differs from the fold's `registry_digest`, every pin is refused with `PIN_UNAVAILABLE` (`detail.registry_mismatch: true`) until an operator records `hive.registry_changed` with the loaded digest or the gateway is restarted with the recorded registry.
@@ -211,7 +211,7 @@ Fields are in `data`. "pin(rel)" means a ref with that rel. Each type has a JSON
 
 | Type | Data | Refs | ext allowed |
 |---|---|---|---|
-| `hive.initialized` | `mode` ∈ {authoritative, mirror}; `profile` (name); `registry_digest`; `operator` {id, role, keys, declaration}, which registers the first operator | pin(policy) (a tree pin, §10) | no |
+| `hive.initialized` | `mode` ∈ {authoritative, mirror}; `profile` (name); `registry_digest`; `operator` {id, role, keys, declaration}, which registers the first operator | pin(policy) (a v1 tree pin, or a v2 pin with a path, §10) | no |
 | `hive.policy_changed` | `profile`; `reason` | pin(policy) | no |
 | `hive.registry_changed` | `registry_digest`; `reason` | — | no |
 | `hive.mode_changed` | `mode` = `authoritative` | — | no |
@@ -263,6 +263,8 @@ policy/
 ```
 
 `hive.initialized` and `hive.policy_changed` pin the tree and name the `profile`: either `core` or a directory under `profiles/`. The gateway materializes the tree through `hivepin`, composes the profile (§13.2) and validates it. It refuses to start if any of that fails.
+
+The policy pin is a v1 tree pin or, since amendment A3, a v2 pin whose `path` names the policy directory. A v2 pin without a path (a whole commit) is refused with `POLICY_INVALID`, and so is a v2 policy tree that hivepin could not materialize in full (an `omitted` entry). A v2 pin names a commit rather than a digest, so a standalone fold resolves it through a registry (`--registry`), not a local `--policy` directory.
 
 The canonical v1 tree is published in this repository under `policy/`, and v1 ships two profiles: `core` and `1-hive`.
 
@@ -392,7 +394,7 @@ For a request `r` from actor `a`, against the effective profile and state `S` = 
 4. Entity existence (`UNKNOWN_*`, or the `*_EXISTS` codes).
 5. From-state (`ILLEGAL_TRANSITION`).
 6. Refs rels (`REF_MISSING`, `REF_NOT_ALLOWED`), then conditions in listed order.
-7. Pin verification (§8), last, because it touches the network.
+7. Pin verification (§8), then the profile's ancestry checks (§13.1, amendment A3), last, because they touch the network.
 
 If every check passes, the event is appended and the fold applies the rule's `to` state and effects. Evaluation and append MUST happen under the gateway's write lock against the current head.
 
@@ -463,6 +465,8 @@ Never waivable: authentication, schema and size (step 1); generation, idempotenc
   - `require_goal`: the envelope `goal` becomes mandatory;
   - `forbid_exceptions`: the core rule becomes non-exceptable.
 - `waivable_codes`: codes of this extension's own conditions that exceptions may waive. Extension rules may set `exceptable`.
+- `repeatable_rels` (amendment A3): rels added by this extension that one request may carry more than once. Every other rel may appear at most once (`REF_NOT_ALLOWED`).
+- `ancestry` (amendment A3): admission checks `{ancestor, descendant, code}` over rels and a code added by this extension. For each v2 pin with rel `descendant`, the v2 pin with rel `ancestor` of the same repository, if any, must be an ancestor of it in git (or the same commit), else the request is refused with `code`. They run at step 7 of §12.1, after pin verification, and like it they are not replayed by the fold: git history is not on the log.
 - `inbox`: the inbox for each class under this profile, as names of inbox rules (§16.2). It replaces the core inbox.
 - `hooks`: extension effects the fold runs `on_touch` (whenever `touch_activity` applies) and `on_terminal` (whenever an entity reaches a terminal state).
 
@@ -483,6 +487,7 @@ A valid extension MUST NOT:
 - use a core effect in an amendment or a hook;
 - redefine a core class, entity or schema;
 - make a core rule exceptable, or make a core condition's code waivable;
+- make a core rel repeatable, or run an ancestry check over core rels or with a core code;
 - use a reserved type prefix.
 
 The gateway refuses to load an extension that breaks any of these. A consequence: every core invariant (§5) holds under every profile. The acceptance suite (§22) runs the core property tests against every shipped profile.
@@ -773,8 +778,8 @@ The supervisor's and chief of staff's *behavior* is specified elsewhere (Phase E
 
 ### 24.2 Rels and codes
 
-- **Rels:** `goal`, `summary`, `context`, `diagnosis` (`rationale` is a core rel).
-- **Codes:** `UNKNOWN_GOAL`, `GOAL_EXISTS`, `GOAL_NOT_ACTIVE`, `GOAL_HAS_OPEN_TASKS`, `BUDGET_RAISE_REQUIRES_OPERATOR`, `INVALID_REVIEW_TARGET`, `NOT_ESCALATED`, `UNKNOWN_PROPOSAL`, `PROPOSAL_EXISTS`, `PROPOSAL_NOT_PENDING`, `PROPOSAL_NOT_APPLICABLE`.
+- **Rels:** `goal`, `summary`, `context`, `diagnosis` (`rationale` is a core rel), and, since amendment A3, `code` and `base` (both repeatable; §24.7).
+- **Codes:** `UNKNOWN_GOAL`, `GOAL_EXISTS`, `GOAL_NOT_ACTIVE`, `GOAL_HAS_OPEN_TASKS`, `BUDGET_RAISE_REQUIRES_OPERATOR`, `INVALID_REVIEW_TARGET`, `NOT_ESCALATED`, `UNKNOWN_PROPOSAL`, `PROPOSAL_EXISTS`, `PROPOSAL_NOT_PENDING`, `PROPOSAL_NOT_APPLICABLE`, and, since amendment A3, `CODE_MISSING`, `CODE_OUT_OF_SCOPE`, `CODE_BASE_INVALID`.
 
 ### 24.3 Goals
 
@@ -825,15 +830,24 @@ To re-verify an applied event, check that the event before it is a signed `propo
 | Core event | Amendment |
 |---|---|
 | `project.opened` | + class chief_of_staff |
-| `task.created` | + class chief_of_staff; require envelope `goal`; + `goal_active`; ext: `kind` ∈ {work, review} (default work), `reviews_task`; + `review_task_target_valid` |
+| `task.created` | + class chief_of_staff; require envelope `goal`; + `goal_active`; ext: `kind` ∈ {work, review} (default work), `reviews_task`, `repos` (A3: the registered repositories the task may change, at most 8); + `review_task_target_valid` |
 | `task.assigned` | + class chief_of_staff; `require_ext: lease` {accept_within_seconds, checkin_every_seconds}; + `review_task_assignee_not_author`; + effect `set_lease` |
 | `task.reassigned` | + classes chief_of_staff, supervisor; `require_ext: lease`; + `review_task_assignee_not_author`; + effect `set_lease` |
 | `task.answered`, `task.closed`, `review.assigned` | + class chief_of_staff |
 | `task.cancelled` | + class chief_of_staff |
 | `task.reported`, `task.result_posted`, `review.recorded` | ext: optional `cost` {usd_micros?, tokens?, wall_clock_seconds?}, the cost since the same actor's previous cost report on this task; + effect `add_cost` |
+| `task.result_posted` | A3: refs `code`, `base` allowed; + `code_matches_repos`; ancestry `base` → `code` (`CODE_BASE_INVALID`) |
 | `project.closed` | + `project_has_no_open_goals` |
 
 **Review tasks.** A task with `ext.kind: review` reviews another task (`ext.reviews_task`), which must be under the same goal and `in_review`. Its result pin is the review document, and it closes like any task. When the chief of staff assigns a review task, it also emits `review.assigned` on the reviewed task, naming the same reviewer. That makes the review task's owner the assigned reviewer. It records the verdict on the reviewed task with `review.recorded`. This lets review work be assigned, supervised and restarted.
+
+### 24.7 Code and base (amendment A3)
+
+A result pins the code it changed, not just a report that describes it. For each repository in the order's `ext.repos`, `task.result_posted` carries:
+- `code`: a whole-commit v2 pin of the branch tip;
+- `base`: a whole-commit v2 pin of the commit the branch started from, an ancestor of `code`.
+
+The reviewer reviews `base..code` from the record: exactly the task's change, including any edit outside the files a report mentions. After a failed review, the next result keeps the same base with a new tip. A task whose order names no repository (research, reviews) carries no `code`; a `code` for an unnamed repository is refused, which makes the order's scope a rule for code. Merging after acceptance merges the reviewed `code` commit, not the branch head.
 
 ## 25. Extension vocabulary
 
@@ -849,6 +863,7 @@ To re-verify an applied event, check that the event before it is a signed `propo
 | `is_escalated` | the entity has an open escalation | `NOT_ESCALATED` |
 | `review_task_target_valid` | kind=review ⇒ `reviews_task` exists under the same goal and is `in_review` | `INVALID_REVIEW_TARGET` |
 | `review_task_assignee_not_author` | kind=review ⇒ the assignee ≠ the author of the reviewed task's current result | `REVIEW_NOT_INDEPENDENT` |
+| `code_matches_repos` | A3: every `code` and `base` ref is a whole-commit v2 pin; one `code` per repository; the `code` repositories are exactly the task's `ext.repos`; one `base` per `code`, of the same repository | `CODE_MISSING`, `CODE_OUT_OF_SCOPE`, `CODE_BASE_INVALID` |
 | `proposed_request_well_formed` | `proposed` is a valid request and not itself a proposal | `SCHEMA_INVALID` |
 | `approver_matches` | the actor's class = `approver_class`, or `operator` | `NOT_AUTHORIZED` |
 | `proposal_applicable` | the proposed request is admissible (§24.4, Application) | `PROPOSAL_NOT_APPLICABLE` |
@@ -857,7 +872,7 @@ To re-verify an applied event, check that the event before it is a signed `propo
 
 - `create_goal`, `mark_goal_approved`, `update_goal_fields`, `record_goal_outcome`;
 - `create_proposal`, `decide_proposal`;
-- `init_task_ext`, `set_lease` (which also sets `ext.attempt` to 1);
+- `init_task_ext` (which also records `ext.repos` when the request gives it), `set_lease` (which also sets `ext.attempt` to 1);
 - `increment_attempt` (on `task.restarted`; also counts `restarts`);
 - `count_nudge`, and `reset_nudges`, the profile's `on_touch` hook;
 - `add_cost` (to the task, and `usd_micros` and `tokens` to its goal);
@@ -869,7 +884,7 @@ Goal status changes are the rules' `to` states.
 
 - **goal:** `id`, `project`, `status`, `status_since`, `title`, `objective`, `relevance`, `budget`, `goal_pin`, `proposed_by`, `proposed_at`, `approved_at`, `outcome`, `summary` (pin), `spent` {usd_micros, tokens} (sum of task cost), `escalation`, `violations`.
 - **proposal:** `id`, `proposer`, `approver_class`, `proposed`, `rationale` (pin), `status`, `status_since`, `submitted_at`, `decided_by`, `decided_at`, `reason`.
-- **task.ext:** `kind`, `reviews_task`, `lease`, `attempt`, `nudges_since_activity`, `restarts`, `spent` {usd_micros, tokens, wall_clock_seconds}, `escalation`. Tasks created before the profile was pinned get these fields from their first extension effect.
+- **task.ext:** `kind`, `reviews_task`, `repos` (only when the order gave it), `lease`, `attempt`, `nudges_since_activity`, `restarts`, `spent` {usd_micros, tokens, wall_clock_seconds}, `escalation`. Tasks created before the profile was pinned get these fields from their first extension effect.
 - **escalation:** {to, code, reason, diagnosis (pin), by, position} or null.
 
 Wall-clock spend depends on `now`, so projections compute it. The fold doesn't store it.
@@ -897,7 +912,7 @@ The core inbox's operator items move to the chief of staff: in this profile, hum
 
 ## 27. `1-hive` fixtures and tests
 
-**Fixtures** (`fixtures/1-hive/`): `goal-happy-path` (goal → tasks → independent review task → close → goal completed → accepted), `proposals`, `escalations`, `reassign-restart`, `budget`, `refusals` (one per reachable extension code).
+**Fixtures** (`fixtures/1-hive/`): `goal-happy-path` (goal → tasks → independent review task → close → goal completed → accepted), `proposals`, `escalations`, `reassign-restart`, `budget`, `refusals` (one per reachable extension code), `code-refs` (amendment A3: missing, out-of-scope and invalid code and base refs, a base that is not an ancestor, and a repeated non-repeatable rel).
 
 **Deliberate-failure cases**, in addition to the core ones:
 - a task under a non-active goal;
@@ -979,3 +994,15 @@ A router (R8, `hive-route`) records its decisions on the record, as an actor of 
 
 A log that contains `hive.policy_changed` pins more than one policy tree, and a standalone fold or verification needs every one of them (§12.4). `hive fold` and `hive verify-log` accept `--policy <dir>` repeatedly, and `--registry <file>`, which materializes through `hivepin` any pinned tree that wasn't given. A tree that can't be resolved is a clean error that names its digest. Found by the 1-hive adoption (`docs/adoption/1-hive.md`).
 
+### A3. Pin format v2, and code and base refs (1-hive)
+
+**Date:** 2026-10-03. **Changes:** §8, §9, §10, §12.1, §13.1, §13.3, §21 and Part II (§24.2, §24.6, new §24.7, §25.1–25.3); `schemas/profile-v1.schema.json` (two optional fields); the `1-hive` profile 1.1.0. **Kind:** behavior change, additive: v1 pins, existing logs and the core table are unchanged.
+
+R0 adds pin format v2 (`hive-pin` `SPEC-v2.md`): a pin names a commit, optionally narrowed to a path that consumers must use. It closes a gap found in 1-hive: a result pinned only its report, so code could change without being on the record, and the reviewer read a branch that could still move. The proposal came from Mike ("What anything is, is a commit"), with three additions: a binding path, a pinned base, and safe symlinks.
+
+- **Pins (§8):** a ref's pin may be v1 or v2. Verification is unchanged: `hivepin.verify` with the publication check.
+- **Policy (§10):** a v2 policy pin must carry the policy directory as its path.
+- **Profiles (§13.1, §13.3):** an extension may make its own rels repeatable and declare ancestry checks over them, run at admission after pin verification (§12.1 step 7). They add checks and never loosen a core rule.
+- **1-hive 1.1.0 (§24.7):** an order lists the repositories a task may change (`ext.repos`); a result carries a `code` and `base` pair for each of them and for no others, and `base` must be an ancestor of `code`.
+- **Compatibility:** the fold state of an existing log is unchanged (`ext.repos` appears only when an order gives it). Under 1-hive 1.0.0 a result may still carry no `code`; a hive moves to 1.1.0 with `hive.policy_changed`.
+- **Fixtures:** every fixture rebuilt for the new policy tree and fixture repository (which gains a second commit, for `base` and `code`); new fixture `1-hive/code-refs`.

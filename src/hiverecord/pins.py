@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 
 import hivepin
-from hivepin import Config, Pin, PinError, Registry
+from hivepin import Config, PinError, Registry, parse_pin, pin_from_dict
 
 from .canonical import digest, dumps, loads
 from .errors import Refusal
@@ -36,12 +36,24 @@ class PinChecker:
         if key in self._ok:
             return
         try:
-            hivepin.verify(Pin.from_dict(pin), self.registry, offline=False, config=self.config)
+            hivepin.verify(pin_from_dict(pin), self.registry, offline=False, config=self.config)
         except PinError as exc:
-            if exc.code == "REMOTE_UNAVAILABLE":
-                raise Refusal("PIN_UNAVAILABLE", exc.message, hivepin_code=exc.code) from None
-            raise Refusal("PIN_INVALID", exc.message, hivepin_code=exc.code) from None
+            raise _refusal(exc) from None
         self._ok.add(key)
+
+    def is_ancestor(self, ancestor: dict, descendant: dict) -> bool:
+        """Whether one v2 pin's commit is an ancestor of another's (same repository)."""
+        try:
+            return hivepin.is_ancestor(pin_from_dict(ancestor), pin_from_dict(descendant),
+                                       self.registry, offline=False, config=self.config)
+        except PinError as exc:
+            raise _refusal(exc) from None
+
+
+def _refusal(exc: PinError) -> Refusal:
+    if exc.code == "REMOTE_UNAVAILABLE":
+        return Refusal("PIN_UNAVAILABLE", exc.message, hivepin_code=exc.code)
+    return Refusal("PIN_INVALID", exc.message, hivepin_code=exc.code)
 
 
 class PolicyResolver:
@@ -63,14 +75,18 @@ class PolicyResolver:
         self._loaded: dict[tuple[str, str], Policy] = {}
 
     def __call__(self, pin: dict, profile: str) -> Policy:
-        want = pin.get("content_digest")
-        key = (want, profile)
+        key = (_policy_key(pin), profile)
         if key in self._loaded:
             return self._loaded[key]
-        if pin.get("kind") != "tree":
-            raise PolicyError("the policy pin must be a tree pin")
-        root = self.dirs.get(want) or self._materialize(pin)
-        policy = load_policy(root, profile, digest=want)
+        if pin.get("version") == 2:
+            if "path" not in pin:
+                raise PolicyError("a v2 policy pin must name the policy directory (its path)")
+            root = self._materialize_v2(pin)
+        else:
+            if pin.get("kind") != "tree":
+                raise PolicyError("the policy pin must be a tree pin")
+            root = self.dirs.get(pin.get("content_digest")) or self._materialize(pin)
+        policy = load_policy(root, profile, digest=tree_digest(root))
         self._loaded[key] = policy
         return policy
 
@@ -82,22 +98,49 @@ class PolicyResolver:
         root = dest if pin["path"] == "." else dest / pin["path"]
         if root.is_dir() and tree_digest(root) == pin["content_digest"]:
             return root
+        self._extract(pin, dest)
+        if tree_digest(root) != pin["content_digest"]:
+            raise PolicyError("the materialized policy tree does not match its pin")
+        return root
+
+    def _materialize_v2(self, pin: dict) -> Path:
+        """A v2 policy pin names a commit, not a digest, so no --policy dir can match
+        it: it is materialized through hivepin, which re-hashes every object."""
+        if self.registry is None or self.cache_dir is None:
+            raise PolicyError(f"the v2 policy pin {_label(pin)} needs a registry to resolve")
+        dest = self.cache_dir / "policies" / ("v2-" + digest(dumps(pin)).split(":", 1)[1])
+        self._extract(pin, dest)    # always re-extracted: nothing on disk is trusted
+        return dest / pin["path"]
+
+    def _extract(self, pin: dict, dest: Path) -> None:
         dest.parent.mkdir(parents=True, exist_ok=True)
         tmp = Path(tempfile.mkdtemp(dir=dest.parent)) / "tree"
         try:
-            hivepin.materialize(Pin.from_dict(pin), tmp, self.registry, offline=True, config=self.config)
+            res = hivepin.materialize(pin_from_dict(pin), tmp, self.registry, offline=True,
+                                      config=self.config)
+            if getattr(res, "omitted", ()):
+                raise PolicyError(f"the policy tree has entries hivepin did not create: "
+                                  f"{[o['path'] for o in res.omitted]}")
             if dest.exists():
                 shutil.rmtree(dest)
             tmp.rename(dest)
         finally:
             shutil.rmtree(tmp.parent, ignore_errors=True)
-        if tree_digest(root) != pin["content_digest"]:
-            raise PolicyError("the materialized policy tree does not match its pin")
-        return root
+
+
+def _policy_key(pin: dict) -> str:
+    return pin.get("content_digest") or digest(dumps(pin))
+
+
+def _label(pin: dict) -> str:
+    try:
+        return pin_from_dict(pin).display_label
+    except PinError:
+        return "(invalid pin)"
 
 
 def load_pin(text: str) -> dict:
-    """A pin from its canonical JSON or its ``hivepin:v1:`` envelope."""
+    """A v1 or v2 pin from its canonical JSON or its ``hivepin:v1:``/``v2:`` envelope."""
     text = text.strip()
-    pin = Pin.parse(text) if text.startswith("hivepin:") else Pin.from_dict(json.loads(text))
+    pin = parse_pin(text) if text.startswith("hivepin:") else pin_from_dict(json.loads(text))
     return pin.to_canonical_dict()

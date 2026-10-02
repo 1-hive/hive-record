@@ -220,12 +220,12 @@ wheels = [
 
 [[package]]
 name = "hivepin"
-version = "1.0.0"
-source = { git = "https://github.com/1-hive/hive-pin#393e75ad9a0e5fba4db3739e11d428b18ea4feb9" }
+version = "2.0.0"
+source = { git = "https://github.com/1-hive/hive-pin?tag=v2.0.0#df0ca3498c07af943d9dce796a55003ad219361e" }
 
 [[package]]
 name = "hiverecord"
-version = "1.0.0"
+version = "1.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "cryptography" },
@@ -252,7 +252,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "cryptography", specifier = ">=41" },
-    { name = "hivepin", git = "https://github.com/1-hive/hive-pin" },
+    { name = "hivepin", git = "https://github.com/1-hive/hive-pin?tag=v2.0.0" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "httpx2", marker = "extra == 'test'", specifier = ">=2.13" },
     { name = "hypothesis", marker = "extra == 'test'", specifier = ">=6" },

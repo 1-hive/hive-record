@@ -263,6 +263,31 @@ def c_review_task_assignee_not_author(ctx: Ctx) -> None:
         _fail("REVIEW_NOT_INDEPENDENT", "a review task cannot go to the author of the reviewed result")
 
 
+def c_code_matches_repos(ctx: Ctx) -> None:
+    """Amendment A3: a result carries one ``code`` and one ``base`` whole-commit v2
+    pin for each repository the order lets the task change (``ext.repos``), and no
+    others. Whether each base is an ancestor of its code is checked at admission
+    (the profile's ``ancestry``), since git history is not on the log."""
+    repos = set((ctx.entity or {}).get("ext", {}).get("repos") or [])
+    refs = ctx.req.get("refs", ())
+    code = [r["pin"] for r in refs if r["rel"] == "code"]
+    base = [r["pin"] for r in refs if r["rel"] == "base"]
+    if any(p.get("version") != 2 or "path" in p for p in code + base):
+        _fail("CODE_BASE_INVALID", "code and base must be whole-commit v2 pins (no path)")
+    code_repos = [p["repository"] for p in code]
+    base_repos = [p["repository"] for p in base]
+    if len(set(code_repos)) != len(code_repos):
+        _fail("CODE_BASE_INVALID", "more than one code ref for one repository")
+    missing = sorted(repos - set(code_repos))
+    if missing:
+        _fail("CODE_MISSING", f"no code ref for {missing[0]}, which the order lets the task change")
+    extra = sorted(set(code_repos) - repos)
+    if extra:
+        _fail("CODE_OUT_OF_SCOPE", f"code ref for {extra[0]}, which the order does not name")
+    if sorted(base_repos) != sorted(code_repos):
+        _fail("CODE_BASE_INVALID", "each code ref needs exactly one base ref of its repository")
+
+
 def c_proposed_request_well_formed(ctx: Ctx) -> None:
     code, reason = ctx.engine.check_proposed(ctx.data.get("proposed"))
     if code:
@@ -349,6 +374,7 @@ CONDITIONS: dict[str, tuple[Any, tuple[str, ...]]] = {
     "is_escalated": (c_is_escalated, ("NOT_ESCALATED",)),
     "review_task_target_valid": (c_review_task_target_valid, ("INVALID_REVIEW_TARGET",)),
     "review_task_assignee_not_author": (c_review_task_assignee_not_author, ("REVIEW_NOT_INDEPENDENT",)),
+    "code_matches_repos": (c_code_matches_repos, ("CODE_MISSING", "CODE_OUT_OF_SCOPE", "CODE_BASE_INVALID")),
     "proposed_request_well_formed": (c_proposed_request_well_formed, ("SCHEMA_INVALID",)),
     "approver_matches": (c_approver_matches, ("NOT_AUTHORIZED",)),
     "proposal_applicable": (c_proposal_applicable, ("PROPOSAL_NOT_APPLICABLE",)),
@@ -537,6 +563,8 @@ def e_init_task_ext(ctx: Ctx) -> None:
     ext = _task_ext(ctx.entity)
     ext["kind"] = ctx.ext().get("kind", "work")
     ext["reviews_task"] = ctx.ext().get("reviews_task")
+    if "repos" in ctx.ext():    # A3; absent keeps earlier fold states unchanged
+        ext["repos"] = list(ctx.ext()["repos"])
 
 
 def e_set_lease(ctx: Ctx) -> None:

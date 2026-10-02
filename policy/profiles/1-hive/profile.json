@@ -1,11 +1,13 @@
 {
   "schema": "hive.profile/1",
   "name": "1-hive",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "extends": "core@1",
   "add_classes": ["chief_of_staff", "supervisor"],
-  "add_rels": ["goal", "summary", "context", "diagnosis"],
-  "add_codes": ["UNKNOWN_GOAL", "GOAL_EXISTS", "GOAL_NOT_ACTIVE", "GOAL_HAS_OPEN_TASKS", "BUDGET_RAISE_REQUIRES_OPERATOR", "INVALID_REVIEW_TARGET", "NOT_ESCALATED", "UNKNOWN_PROPOSAL", "PROPOSAL_EXISTS", "PROPOSAL_NOT_PENDING", "PROPOSAL_NOT_APPLICABLE"],
+  "add_rels": ["goal", "summary", "context", "diagnosis", "code", "base"],
+  "repeatable_rels": ["code", "base"],
+  "ancestry": [{"ancestor": "base", "descendant": "code", "code": "CODE_BASE_INVALID"}],
+  "add_codes": ["UNKNOWN_GOAL", "GOAL_EXISTS", "GOAL_NOT_ACTIVE", "GOAL_HAS_OPEN_TASKS", "BUDGET_RAISE_REQUIRES_OPERATOR", "INVALID_REVIEW_TARGET", "NOT_ESCALATED", "UNKNOWN_PROPOSAL", "PROPOSAL_EXISTS", "PROPOSAL_NOT_PENDING", "PROPOSAL_NOT_APPLICABLE", "CODE_MISSING", "CODE_OUT_OF_SCOPE", "CODE_BASE_INVALID"],
   "waivable_codes": [],
   "entities": {
     "goal": {"collection": "goals", "id": "goal", "state_field": "status", "states": ["proposed", "active", "completed", "accepted", "abandoned"], "terminal": ["accepted", "abandoned"], "unknown_code": "UNKNOWN_GOAL", "exists_code": "GOAL_EXISTS", "illegal_code": "ILLEGAL_TRANSITION", "mirrorable": true},
@@ -41,7 +43,7 @@
     "review.assigned": {"add_classes": ["chief_of_staff"]},
     "task.cancelled": {"add_classes": ["chief_of_staff"]},
     "task.reported": {"add_effects": ["add_cost"]},
-    "task.result_posted": {"add_effects": ["add_cost"]},
+    "task.result_posted": {"add_refs": {"required": [], "allowed": ["code", "base"]}, "add_conditions": ["code_matches_repos"], "add_effects": ["add_cost"]},
     "review.recorded": {"add_effects": ["add_cost"]}
   },
   "hooks": {

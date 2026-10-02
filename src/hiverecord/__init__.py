@@ -4,4 +4,4 @@
 An append-only, signed, policy-gated event log behind a single gateway. See SPEC.md.
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"

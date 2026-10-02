@@ -107,6 +107,8 @@ class Policy:
     inbox: dict[str, tuple[str, ...]]
     hooks: dict[str, tuple[str, ...]] = field(default_factory=dict)
     waivable: frozenset[str] = frozenset()
+    repeatable: frozenset[str] = frozenset()        # rels a request may repeat (A3)
+    ancestry: tuple[tuple[str, str, str], ...] = ()  # (ancestor, descendant, code), A3
 
     def entity_of(self, event_type: str) -> dict:
         return self.entities[self.rules[event_type].entity]
@@ -180,6 +182,8 @@ def load_policy(root: str | os.PathLike, profile: str, *, digest: str | None = N
     inbox = {k: tuple(v) for k, v in table["inbox"].items()}
     hooks: dict[str, tuple[str, ...]] = {}
     waivable = set(table["waivable_codes"])
+    repeatable: set[str] = set()
+    ancestry: list[tuple[str, str, str]] = []
     name, version = "core", table["version"]
 
     if profile != "core":
@@ -206,12 +210,23 @@ def load_policy(root: str | os.PathLike, profile: str, *, digest: str | None = N
             raise PolicyError(f"profile {profile}: may only make its own codes waivable, "
                               f"not {sorted(extra - set(prof['add_codes']))}")
         waivable |= extra
+        own_rels, own_codes = set(prof["add_rels"]), set(prof["add_codes"])
+        repeatable = set(prof.get("repeatable_rels", []))
+        if not repeatable <= own_rels:
+            raise PolicyError(f"profile {profile}: may only make its own rels repeatable, "
+                              f"not {sorted(repeatable - own_rels)}")
+        for a in prof.get("ancestry", []):
+            if not {a["ancestor"], a["descendant"]} <= own_rels or a["code"] not in own_codes:
+                raise PolicyError(f"profile {profile}: an ancestry check uses rels or a code "
+                                  "it does not add")
+            ancestry.append((a["ancestor"], a["descendant"], a["code"]))
 
     policy = Policy(
         name=name, version=version, core_version=table["version"], digest=digest,
         classes=tuple(classes), rels=frozenset(rels), codes=frozenset(codes),
         entities=entities, rules=rules, data_schemas=data_schemas, ext_schemas=ext_schemas,
         inbox=inbox, hooks=hooks, waivable=frozenset(waivable),
+        repeatable=frozenset(repeatable), ancestry=tuple(ancestry),
     )
     _validate(policy)
     return policy

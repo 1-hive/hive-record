@@ -77,6 +77,11 @@ BAD_EXTENSIONS = {
     "makes a core rule exceptable": lambda p: p["amend"]["task.closed"].update(exceptable=True),
     "exceptable identity rule": lambda p: p["rules"].append({**p["rules"][0], "event": "actor.promoted",
                                                              "entity": "actor", "exceptable": True}),
+    "makes a core rel repeatable": lambda p: p["repeatable_rels"].append("result"),
+    "ancestry over core rels": lambda p: p["ancestry"].append({"ancestor": "order", "descendant": "result",
+                                                               "code": "CODE_BASE_INVALID"}),
+    "ancestry with a core code": lambda p: p["ancestry"].append({"ancestor": "base", "descendant": "code",
+                                                                 "code": "NOT_AUTHORIZED"}),
 }
 
 
@@ -134,3 +139,10 @@ def test_review_gate_is_never_exceptable():
         p = load_policy(POLICY, profile)
         assert not any(p.rules[t].exceptable for t in ("review.assigned", "review.recorded", "task.closed"))
         assert not {"NOT_AUTHORIZED", "NOT_OWNER", "REVIEW_REQUIRED", "PIN_INVALID", "STALE_REVISION"} & p.waivable
+
+
+def test_1hive_repeats_and_checks_code_and_base():
+    one = load_policy(POLICY, "1-hive")
+    assert one.repeatable == {"code", "base"}
+    assert one.ancestry == (("base", "code", "CODE_BASE_INVALID"),)
+    assert load_policy(POLICY, "core").repeatable == frozenset()

@@ -417,6 +417,46 @@
         "pattern": "^[A-Z][A-Z0-9_]*$",
         "maxLength": 64
       }
+    },
+    "repeatable_rels": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "maxLength": 64
+      },
+      "description": "Rels of this profile that a request may carry more than once (amendment A3). Core rels stay unique."
+    },
+    "ancestry": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ancestor",
+          "descendant",
+          "code"
+        ],
+        "properties": {
+          "ancestor": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 64
+          },
+          "descendant": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 64
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "maxLength": 64
+          }
+        }
+      },
+      "description": "Admission-only checks (amendment A3): each `descendant` pin's commit must have the `ancestor` pin of the same repository as an ancestor, else the request is refused with `code`. Checked at pin verification (\u00a712.1 step 7), so not replayed by the fold."
     }
   }
 }

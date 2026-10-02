@@ -9,7 +9,7 @@ The hive record for One Hive, releases **R1** (an append-only event log behind a
 - **Exceptions, on the record.** A move the rules wrongly refuse can be admitted exactly as sent, after a recorded grant by an operator or arbiter. Authority, pins and the review gate are never waived.
 - **Core plus profiles.** Every hive runs the core. The `1-hive` profile adds goals, proposals, leases, supervision and cost. Extensions may only add or tighten.
 
-Status: spec **v1.0, frozen** ([`SPEC.md`](SPEC.md), amendments A1–A2), with the reference implementation `hiverecord` **1.0.0**, released after its first real adoption: [`docs/adoption/1-hive.md`](docs/adoption/1-hive.md).
+Status: spec **v1.0, frozen** ([`SPEC.md`](SPEC.md), amendments A1–A3), with the reference implementation `hiverecord` **1.1.0**. 1.0.0 was released after its first real adoption: [`docs/adoption/1-hive.md`](docs/adoption/1-hive.md). 1.1.0 adds amendment A3: R0 pin format v2, and `code` and `base` refs on 1-hive results.
 
 ## Layout
 
