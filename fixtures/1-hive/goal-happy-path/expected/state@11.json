@@ -155,7 +155,7 @@
       },
       "escalation": null,
       "goal_pin": {
-        "commit_oid": "sha1:56a35a06533efd250cff8a6fc1e39597d91bfcd4",
+        "commit_oid": "sha1:0524cc56097242fc18f137ed08246e0b686575f2",
         "content_digest": "sha256:50260a857561cd0c749118bf0a7183230a8c6056d12f3c92c00dd3a02c34fc1d",
         "kind": "file",
         "mode": "100644",
@@ -194,10 +194,10 @@
     "hive": "fixture",
     "mode": "authoritative",
     "policy": {
-      "commit_oid": "sha1:56a35a06533efd250cff8a6fc1e39597d91bfcd4",
-      "content_digest": "sha256:a2c2611e1eb76594d7d7e4d0ccd095027b19dfd03fc9ccd53adcdb946d827eb8",
+      "commit_oid": "sha1:0524cc56097242fc18f137ed08246e0b686575f2",
+      "content_digest": "sha256:623f08290f0c778e85f08daee090f4ec71f07765eb699d57b2266de57aa26cb7",
       "kind": "tree",
-      "object_oid": "sha1:318777868a9dcc0bb04f0ff4b2a2bd4952e0eac4",
+      "object_oid": "sha1:ec00e05cb4f101300f3ef88f0da2b54ad74bee1e",
       "path": "policy",
       "repository": "fixture",
       "version": 1

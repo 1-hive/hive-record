@@ -88,6 +88,12 @@
       "minLength": 1,
       "maxLength": 64
     },
+    "runtime": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "maxLength": 64,
+      "description": "Where the attempt runs, as the launcher labels it (e.g. host, container). Recorded, never used to decide (amendment A4)."
+    },
     "facts": {
       "type": "object",
       "additionalProperties": false,

@@ -19,3 +19,4 @@
 {"code":"SCHEMA_INVALID","http":422,"positions":[19],"status":"refused"}
 {"code":"SCHEMA_INVALID","http":422,"positions":[20],"status":"refused"}
 {"code":"SCHEMA_INVALID","http":422,"positions":[21],"status":"refused"}
+{"code":"SCHEMA_INVALID","http":422,"positions":[22],"status":"refused"}

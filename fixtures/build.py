@@ -559,7 +559,7 @@ GOAL = {"project": "p1", "title": "Goal one", "objective": "Ship the thing",
 
 
 def routing(fx: FixtureRepo) -> Scenario:
-    """Amendment A1: the router (an instrument) records its decisions; no one else can."""
+    """Amendments A1 and A4: the router (an instrument) records its decisions, with the runtime; no one else can."""
     s = Scenario(fx)
     core_setup(s)
     sha = "sha256:" + "ab" * 32
@@ -572,7 +572,7 @@ def routing(fx: FixtureRepo) -> Scenario:
     decided = {"task": "t1", "attempt": "t1.worker.0", "mode": "fixed", "table": sha,
                "tier": "strong", "computed_tier": "strong", "route_id": "opus-plan",
                "route_pin": "sha256:" + "cd" * 32, "pool": "claude-plan", "model": "claude-opus-5-5",
-               "harness": "claude-code",
+               "harness": "claude-code", "runtime": "container",
                "facts": {"specification": "partial", "scope": "few", "estimated": ["scope"]},
                "rules": ["F1", "F2", "F5", "fixed"], "log": log(3)}
     s.req("inst", "route.decided", data=decided)
@@ -594,6 +594,7 @@ def routing(fx: FixtureRepo) -> Scenario:
           expect="NOT_AUTHORIZED")
     s.req("inst", "route.decided", task="t1", data=decided, expect="SCHEMA_INVALID")
     s.req("inst", "route.decided", data={**decided, "tier": "huge"}, expect="SCHEMA_INVALID")
+    s.req("inst", "route.decided", data={**decided, "runtime": "Not A Label"}, expect="SCHEMA_INVALID")
     s.req("inst", "route.decided", data={k: v for k, v in decided.items() if k != "log"},
           expect="SCHEMA_INVALID")
     return s

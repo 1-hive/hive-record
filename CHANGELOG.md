@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.2.0] — 2026-10-13
+
+Amendment A4 (SPEC Appendix D): `route.decided` takes an optional `runtime`, where the attempt ran. Core legality table 1.2.0; fixture `core/routing` covers it; every fixture rebuilt for the new policy pin.
+
 ## [1.1.0] — 2026-10-03
 
 Amendment A3 (SPEC Appendix D): R0 pin format v2, and code and base refs on 1-hive results. Needs `hivepin` 2.0.0.

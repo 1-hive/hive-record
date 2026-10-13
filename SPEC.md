@@ -979,7 +979,7 @@ A router (R8, `hive-route`) records its decisions on the record, as an actor of 
 |---|---|---|
 | `route.table_pinned` | instrument, operator | `table` (sha256 of the route table), optional `version`, `log` |
 | `route.mode_set` | instrument, operator | `mode` (`live`, `fixed`), `table`, `log` |
-| `route.decided` | instrument | `task`, `attempt`, `mode`, `table`, `tier`, `computed_tier`, `route_id`, `route_pin`, `pool`, `model`, optional `harness`, `effort`, `facts` (the four facts' values, and which were `estimated`), `rules` (the ids of the rules that applied), `log` |
+| `route.decided` | instrument | `task`, `attempt`, `mode`, `table`, `tier`, `computed_tier`, `route_id`, `route_pin`, `pool`, `model`, optional `harness`, `effort`, `runtime` (A4), `facts` (the four facts' values, and which were `estimated`), `rules` (the ids of the rules that applied), `log` |
 | `route.waiting` | instrument | `task`, `attempt`, `mode`, `table`, `decision` (`wait`, `no_route`, `reconcile`), `computed_tier`, optional `wait_until`, `rules`, `log` |
 | `route.canary_recorded` | instrument | `route_id`, `route_pin`, `status`, `suite`, `suite_pin`, `passed`, `cases`, `lesson`, `log` |
 | `route.drift_detected` | instrument | `route_id`, `route_pin`, `attempt`, optional `task`, `pinned_model`, `observed_models`, `log` |
@@ -1006,3 +1006,13 @@ R0 adds pin format v2 (`hive-pin` `SPEC-v2.md`): a pin names a commit, optionall
 - **1-hive 1.1.0 (§24.7):** an order lists the repositories a task may change (`ext.repos`); a result carries a `code` and `base` pair for each of them and for no others, and `base` must be an ancestor of `code`.
 - **Compatibility:** the fold state of an existing log is unchanged (`ext.repos` appears only when an order gives it). Under 1-hive 1.0.0 a result may still carry no `code`; a hive moves to 1.1.0 with `hive.policy_changed`.
 - **Fixtures:** every fixture rebuilt for the new policy tree and fixture repository (which gains a second commit, for `base` and `code`); new fixture `1-hive/code-refs`.
+
+### A4. The runtime on `route.decided`
+
+**Date:** 2026-10-13. **Changes:** A1's `route.decided` row; core legality table version 1.2.0. **Kind:** behavior change, additive: one optional field; existing events and logs are unchanged.
+
+`route.decided` gains an optional `runtime`: where the attempt runs, as the launcher labels it (`host`, `container`, …; an id of up to 64 characters). The router already receives it in each request (ROUTING §9) and keeps evidence from different runtimes apart, because a change of runtime (sandboxing, OS user, permission mode) can change outcomes as much as a change of model. Until now the record's summary dropped it, so the record alone couldn't tell which attempts ran sandboxed. Found by 1-hive, whose agents moved into containers on 2026-10-06.
+
+- **Recorded, never used to decide.** No rule, state or condition reads it.
+- **Compatibility:** a router must send it only to a record whose policy has core table 1.2.0 or later; earlier tables refuse it (`SCHEMA_INVALID`).
+- **Fixtures:** `core/routing` records a decision with a runtime and refuses a malformed one; every fixture rebuilt for the new policy pin.
