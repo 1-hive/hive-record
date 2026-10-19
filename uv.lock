@@ -225,7 +225,7 @@ source = { git = "https://github.com/1-hive/hive-pin?tag=v2.0.0#df0ca3498c07af94
 
 [[package]]
 name = "hiverecord"
-version = "1.1.0"
+version = "1.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "cryptography" },
