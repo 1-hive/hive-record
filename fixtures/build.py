@@ -183,6 +183,34 @@ def happy_path(fx: FixtureRepo) -> Scenario:
     return s
 
 
+def cause(fx: FixtureRepo) -> Scenario:
+    """Amendment A5: a cause on an event, by event and by outside reference; refused unless the actor had seen it."""
+    s = Scenario(fx)
+    core_setup(s)
+    s.req("coord", "task.created", task="t1", refs=[("order", "order-1")], data={"title": "Build", "project": "p1"},
+          fields={"cause": {"external": "telegram:-5437945421/10588"}})
+    created = s.last_id()
+    s.req("coord", "task.assigned", task="t1", rev=s.task("t1")["revision"], data={"to": "w1"},
+          fields={"cause": {"event": created}})
+    assigned = s.last_id()
+    s.req("w1", "task.accepted", task="t1", rev=s.task("t1")["revision"],
+          fields={"cause": {"event": assigned, "external": "iter:w1/request-7"}})
+    s.snapshot()
+    report = {"task": "t1", "data": {"kind": "progress"}, "refs": [("report", "report-1")]}
+    # a cause must be an event of this hive, at a position the actor had seen
+    s.req("w1", "task.reported", **report, fields={"cause": {"event": "01a10000-0000-7000-8000-000000000000"}},
+          expect="UNKNOWN_CAUSE")
+    latest = s.last_id()   # the refusal itself, at the head: beyond a basis of head - 1
+    s.req("w1", "task.reported", **report, basis=s.r.engine.head - 1, fields={"cause": {"event": latest}},
+          expect="UNKNOWN_CAUSE")
+    s.req("w1", "task.reported", **report, fields={"cause": {}}, expect="SCHEMA_INVALID")
+    s.req("w1", "task.reported", **report, fields={"cause": {"event": "not-an-id"}}, expect="SCHEMA_INVALID")
+    s.req("w1", "task.reported", **report, fields={"cause": {"note": "x"}}, expect="SCHEMA_INVALID")
+    # a refusal can be cited: it is an event like any other
+    s.req("w1", "task.reported", **report, fields={"cause": {"event": latest}})
+    return s
+
+
 def review_loop(fx: FixtureRepo) -> Scenario:
     s = Scenario(fx)
     core_setup(s)
@@ -327,6 +355,8 @@ def core_refusals(fx: FixtureRepo) -> Scenario:
     s.req("coord", "task.created", task="x", data=t, refs=order, pad=9000, expect="PAYLOAD_TOO_LARGE")
     s.req("coord", "task.created", task="x", data=t, refs=order, basis=10_000, expect="STALE_GENERATION")
     s.req("coord", "task.created", task="x", data=t, refs=order, generation="stale", expect="STALE_GENERATION")
+    s.req("coord", "task.created", task="x", data=t, refs=order,
+          fields={"cause": {"event": "01a10000-0000-7000-8000-000000000000"}}, expect="UNKNOWN_CAUSE")   # A5
     for body in ('{"not json', '[1,2]', '{"basis":1.5}',
                  '{ "type": "task.created" }'):
         s.at = advance(s.at)
@@ -476,12 +506,14 @@ def exception(fx: FixtureRepo) -> Scenario:
     # the coordinator finds the tests were skipped: reassigning out of done is illegal
     s.req("coord", "task.reassigned", task="t1", rev=s.task("t1")["revision"], idem="reopen-t1",
           data={"to": "w2", "reason": "closed too early: the integration tests were skipped"},
+          fields={"cause": {"external": "ci:nightly/2026-09-01#tests-skipped"}},   # A5: kept on the applied event
           expect="ILLEGAL_TRANSITION")
     refusal = s.last_id()
     s.req("w1", "exception.requested", data={"exception_id": "e0", "refusal": refusal, "reason": "x"},
           expect="REFUSAL_MISMATCH")
     s.req("coord", "exception.requested", refs=[("rationale", "rationale-1")],
-          data={"exception_id": "e1", "refusal": refusal, "reason": "Reopen t1 for w2; see the rationale"})
+          data={"exception_id": "e1", "refusal": refusal, "reason": "Reopen t1 for w2; see the rationale"},
+          fields={"cause": {"event": refusal}})
     s.snapshot()
     s.req("coord", "exception.requested", data={"exception_id": "e9", "refusal": refusal, "reason": "again"},
           expect="EXCEPTION_EXISTS")
@@ -667,7 +699,8 @@ def proposals(fx: FixtureRepo) -> Scenario:
     new_task = {"type": "task.created", "task": "t9", "goal": "g1", "basis": s.r.engine.head,
                 "idempotency_key": "want-t9", "refs": [{"rel": "order", "pin": fx.pin("order-3")}],
                 "data": {"title": "Split out the parser", "project": "p1"}}
-    s.req("w1", "proposal.submitted", data={"proposal_id": "pr2", "proposed": new_task, "approver_class": "coordinator"})
+    s.req("w1", "proposal.submitted", data={"proposal_id": "pr2", "approver_class": "coordinator",
+                                            "proposed": {**new_task, "cause": {"external": "telegram:-1/42"}}})  # A5: kept when applied
     s.req("w2", "proposal.withdrawn", data={"proposal_id": "pr2", "reason": "not mine"}, expect="NOT_OWNER")
     s.req("coord", "proposal.approved", data={"proposal_id": "pr2"})
     # rejected, and withdrawn
@@ -872,6 +905,7 @@ SCENARIOS = {
     "core/exception": exception,
     "core/refusals": core_refusals,
     "core/routing": routing,
+    "core/cause": cause,
     "1-hive/goal-happy-path": goal_happy_path,
     "1-hive/proposals": proposals,
     "1-hive/escalations": escalations,

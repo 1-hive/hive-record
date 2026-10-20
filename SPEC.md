@@ -160,6 +160,7 @@ The record can't check this by itself. It is part of the deployment acceptance t
 | `goal` | client | per profile | Reserved for profiles that define goals, which say where it is required; otherwise it MUST be absent. The server indexes task events by their task's goal (§18) but never adds the field to the envelope. |
 | `basis` | client | yes | The highest position the client had observed when deciding. |
 | `expected_revision` | client | no | For task events: the task revision the client acted on (§17.4). |
+| `cause` | client | no | What this event responds to: `{event?, external?}` (§17.5, amendment A5). |
 | `idempotency_key` | client | yes | 1–128 chars, `^[A-Za-z0-9._:-]+$`. |
 | `refs` | client | yes (may be empty) | Array of `{rel, pin}` (§8). At most 16. |
 | `data` | client | yes (may be `{}`) | Type-specific fields. May contain `ext` (§7.5). |
@@ -168,7 +169,7 @@ Ids for tasks, projects and extension entities are client-chosen, match `^[a-z0-
 
 ### 7.2 Request
 
-A request is a JSON object with exactly `type`, `basis`, `idempotency_key`, `refs`, `data`, plus `task`, `goal` and `expected_revision` where used. Unknown top-level fields are refused (`SCHEMA_INVALID`). The generation travels in the `X-Hive-Generation` header, not in the body (§17.3).
+A request is a JSON object with exactly `type`, `basis`, `idempotency_key`, `refs`, `data`, plus `task`, `goal`, `expected_revision` and `cause` where used. Unknown top-level fields are refused (`SCHEMA_INVALID`). The generation travels in the `X-Hive-Generation` header, not in the body (§17.3).
 
 The **canonical request** is the R0 canonical JSON of exactly these fields. Every one of them is copied into the event unchanged, which is what makes stored signatures verifiable.
 
@@ -389,7 +390,7 @@ The actor id `gateway` is reserved for the gateway's own events. `gateway.reject
 For a request `r` from actor `a`, against the effective profile and state `S` = the fold at the current head, the checks run in this order, and the first failure decides the code:
 
 1. Authentication (§6.4), then envelope and data schema validity, including `ext` against the profile (`SCHEMA_INVALID`, `UNSUPPORTED_SCHEMA`, `PAYLOAD_TOO_LARGE`, `UNKNOWN_EVENT_TYPE`).
-2. Generation and basis (§17.2–17.3), then idempotency (§17.1), then expected revision (§17.4, `STALE_REVISION`).
+2. Generation and basis (§17.2–17.3), then the cause (§17.5, `UNKNOWN_CAUSE`), then idempotency (§17.1), then expected revision (§17.4, `STALE_REVISION`).
 3. Rule lookup. Class check (`NOT_AUTHORIZED`), then relation check (`NOT_OWNER`).
 4. Entity existence (`UNKNOWN_*`, or the `*_EXISTS` codes).
 5. From-state (`ILLEGAL_TRANSITION`).
@@ -404,7 +405,7 @@ A refused request from an authenticated actor produces exactly one `gateway.reje
 
 ### 12.3 Core refusal codes
 
-`SCHEMA_INVALID`, `UNSUPPORTED_SCHEMA` (reserved for a future request schema; unreachable in v1), `UNKNOWN_EVENT_TYPE`, `PAYLOAD_TOO_LARGE`, `STALE_GENERATION`, `STALE_REVISION`, `IDEMPOTENCY_CONFLICT`, `KEY_EXISTS`, `UNKNOWN_KEY`, `NOT_AUTHORIZED`, `NOT_OWNER`, `UNKNOWN_ACTOR`, `ACTOR_RETIRED`, `ACTOR_EXISTS`, `UNKNOWN_PROJECT`, `PROJECT_EXISTS`, `PROJECT_NOT_OPEN`, `PROJECT_HAS_OPEN_WORK`, `UNKNOWN_TASK`, `TASK_EXISTS`, `ILLEGAL_TRANSITION`, `INVALID_ASSIGNEE`, `NOT_ANSWERED`, `REF_MISSING`, `REF_NOT_ALLOWED`, `PIN_INVALID`, `PIN_UNAVAILABLE`, `POLICY_INVALID` (a policy pin whose tree or profile doesn't load, checked at step 7), `REVIEW_REQUIRED`, `REVIEW_STALE`, `REVIEW_NOT_INDEPENDENT`, `REVIEW_NOT_ASSIGNED`, `LAST_OPERATOR`, `UNKNOWN_EXCEPTION`, `EXCEPTION_EXISTS`, `EXCEPTION_NOT_PENDING`, `REFUSAL_MISMATCH`, `NOT_EXCEPTABLE`, `EXCEPTION_NOT_APPLICABLE`, `INTERNAL_ERROR`.
+`SCHEMA_INVALID`, `UNSUPPORTED_SCHEMA` (reserved for a future request schema; unreachable in v1), `UNKNOWN_EVENT_TYPE`, `PAYLOAD_TOO_LARGE`, `STALE_GENERATION`, `UNKNOWN_CAUSE` (A5), `STALE_REVISION`, `IDEMPOTENCY_CONFLICT`, `KEY_EXISTS`, `UNKNOWN_KEY`, `NOT_AUTHORIZED`, `NOT_OWNER`, `UNKNOWN_ACTOR`, `ACTOR_RETIRED`, `ACTOR_EXISTS`, `UNKNOWN_PROJECT`, `PROJECT_EXISTS`, `PROJECT_NOT_OPEN`, `PROJECT_HAS_OPEN_WORK`, `UNKNOWN_TASK`, `TASK_EXISTS`, `ILLEGAL_TRANSITION`, `INVALID_ASSIGNEE`, `NOT_ANSWERED`, `REF_MISSING`, `REF_NOT_ALLOWED`, `PIN_INVALID`, `PIN_UNAVAILABLE`, `POLICY_INVALID` (a policy pin whose tree or profile doesn't load, checked at step 7), `REVIEW_REQUIRED`, `REVIEW_STALE`, `REVIEW_NOT_INDEPENDENT`, `REVIEW_NOT_ASSIGNED`, `LAST_OPERATOR`, `UNKNOWN_EXCEPTION`, `EXCEPTION_EXISTS`, `EXCEPTION_NOT_PENDING`, `REFUSAL_MISMATCH`, `NOT_EXCEPTABLE`, `EXCEPTION_NOT_APPLICABLE`, `INTERNAL_ERROR`.
 
 Only `PIN_UNAVAILABLE` and `INTERNAL_ERROR` are `retryable: true`. Extensions may add codes. Clients MUST rely on codes, not on reason text.
 
@@ -437,7 +438,7 @@ Never waivable: authentication, schema and size (step 1); generation, idempotenc
 4. An operator or arbiter, never the requester, sends `exception.granted` or `exception.denied`.
 
 **Application.** On `exception.granted`, the refused request (stored in the refusal, §9) is evaluated as if its requester had sent it again against the current head: expected revision (§17.4), then steps 3–7, with the refused code waived wherever it arises in steps 5–6. The requester must still be active (otherwise the inner code is `ACTOR_RETIRED`), the refused request's signing key must still be one of its active keys (`UNKNOWN_KEY`), its idempotency key must be unused (`IDEMPOTENCY_CONFLICT`), and, under the profile now in force, its rule must still be exceptable and its code waivable (`NOT_EXCEPTABLE`).
-- If it is admissible, the gateway appends **two consecutive events atomically**: `exception.granted`, then the applied event. The applied event is the refused request exactly (`type`, `task`, `goal`, `basis`, `expected_revision`, `idempotency_key`, `refs`, `data`), with `actor` = the requester, `signature` = the refused request's signature, `via` = the refusal's via, and `on_exception` = the exception id. Because the body is unchanged, the requester's signature still verifies. The idempotency key is now consumed, so a retry of the original request returns this event.
+- If it is admissible, the gateway appends **two consecutive events atomically**: `exception.granted`, then the applied event. The applied event is the refused request exactly (`type`, `task`, `goal`, `basis`, `expected_revision`, `cause`, `idempotency_key`, `refs`, `data`), with `actor` = the requester, `signature` = the refused request's signature, `via` = the refusal's via, and `on_exception` = the exception id. Because the body is unchanged, the requester's signature still verifies. The idempotency key is now consumed, so a retry of the original request returns this event.
 - If it fails again, for any reason including a different code, the grant is refused with `EXCEPTION_NOT_APPLICABLE` and `detail.inner_code`, and the exception stays `pending`. In particular, if the task has changed since the refusal, the revision check fails: the arbiter decided on a situation that no longer exists.
 
 **Promotion of an arbiter (guidance).** A hive can try an agent as an arbiter without giving it authority: register it as an `instrument`, let it send `exception.advised` on real requests, and compare its advice with the operator's decisions against a criterion written down in advance. If it meets the criterion, the operator registers it as an `arbiter`. The record holds the evidence for the decision.
@@ -611,6 +612,14 @@ Profiles replace the inbox (§26). An item is `{kind, entity, id, position, titl
 - Every task has a `revision`: 1 at creation, plus 1 for every accepted event on that task.
 - A task request MAY carry `expected_revision`. If it differs from the task's revision, the request is refused with `STALE_REVISION`.
 - This catches decisions made on stale information even when the transition itself would still be legal, e.g. a coordinator closing a task based on an old reading. Clients acting on a task they just read SHOULD send it. The CLI and the operating loop always do.
+
+### 17.5 Cause (amendment A5)
+
+A request MAY carry `cause`: what the actor was responding to. It is an object with at least one of:
+- `event`: the `event_id` of an event of this hive. It MUST exist and its position MUST be at most `basis`, since an actor can only cite what it had seen; otherwise the request is refused with `UNKNOWN_CAUSE` (step 2 of §12.1, never mirrored).
+- `external`: a string of up to 256 characters naming something outside the record: a chat message (`telegram:<chat>/<message>`), a router decision (`route:<log digest>#<seq>`), a source hive's event behind a mirror adapter (`mirror:<source>/<id>`). The record doesn't resolve it.
+
+`basis` says what the actor had seen; `cause` says what it acted on. The core already links a few events this way (`result_event` on reviews, `on_exception` on applied events); `cause` makes the link available on every event, so that projections, replay and shadow trials (R3, R9) can follow a decision back to its trigger. **Recorded, never used to decide:** no rule, state or condition reads it. A cause names a trigger, not authority: the cited event grants nothing.
 
 ## 18. Storage guarantees (Postgres)
 
@@ -1016,3 +1025,13 @@ R0 adds pin format v2 (`hive-pin` `SPEC-v2.md`): a pin names a commit, optionall
 - **Recorded, never used to decide.** No rule, state or condition reads it.
 - **Compatibility:** a router must send it only to a record whose policy has core table 1.2.0 or later; earlier tables refuse it (`SCHEMA_INVALID`).
 - **Fixtures:** `core/routing` records a decision with a runtime and refuses a malformed one; every fixture rebuilt for the new policy pin.
+
+### A5. A cause on every event
+
+**Date:** 2026-10-20. **Changes:** §7.1 (one envelope row), §7.2, §12.1 step 2, §12.2 (one code), §12.6, new §17.5; `schemas/request-v1.schema.json` and `schemas/envelope-v1.schema.json` (one optional field); core legality table version 1.3.0. **Kind:** behavior change, additive: one optional client field and one refusal code; existing events and logs are unchanged.
+
+Every request may carry `cause`: the event it responds to (`event`, an `event_id` of this hive at a position the actor had seen), or something outside the record (`external`, up to 256 characters), or both. A cited event that doesn't exist, or lies beyond `basis`, is refused with `UNKNOWN_CAUSE`. Found while planning the proto-hive adoption: the record knew what an actor had seen (`basis`) and who signed, but not which message, decision or event a task, answer or close was a response to, which replay and shadow trials (R9) and the chief of staff's audit (M3) need, and which can't be backfilled.
+
+- **Recorded, never used to decide.** No rule, state or condition reads it; a cause grants no authority.
+- **Compatibility:** a client must send it only to a gateway of 1.3.0 or later; earlier gateways refuse it (`SCHEMA_INVALID`). A log with causes re-verifies only with 1.3.0 or later, because the signature covers the field. Proposals may carry it in their proposed request, and the applied event keeps it; an event applied from an exception keeps the refused request's cause.
+- **Fixtures:** new `core/cause`: a cause by event and by external reference, a cause on a proposed and an exception-applied request, and refusals for an unknown event, an event beyond `basis` and an empty cause; every fixture rebuilt for the new policy pin.

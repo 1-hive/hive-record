@@ -136,8 +136,9 @@ def cmd_emit(args) -> None:
         except Exception:
             rev = None                                     # e.g. task.created
     try:
+        cause = {k: v for k, v in (("event", args.cause_event), ("external", args.cause_external)) if v}
         payload = c.emit(args.type, data=data, refs=refs, task=args.task, goal=args.goal,
-                         expected_revision=rev, idempotency_key=args.idempotency_key)
+                         expected_revision=rev, idempotency_key=args.idempotency_key, cause=cause or None)
     except Exception as exc:
         payload = getattr(exc, "payload", None)
         if payload is None:
@@ -304,6 +305,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--expected-revision", type=int)
     s.add_argument("--no-revision", action="store_true", help="do not send the task's current revision")
     s.add_argument("--idempotency-key")
+    s.add_argument("--cause-event", metavar="EVENT_ID", help="the event this one responds to (SPEC §17.5)")
+    s.add_argument("--cause-external", metavar="REF", help="what outside the record caused it, e.g. telegram:<chat>/<msg>")
     s.set_defaults(fn=cmd_emit)
 
     s = sub.add_parser("events", help="list or follow events")

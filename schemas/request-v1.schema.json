@@ -35,6 +35,23 @@
       "type": "integer",
       "minimum": 1
     },
+    "cause": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "event": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "maxLength": 36
+        },
+        "external": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
     "idempotency_key": {
       "type": "string",
       "pattern": "^[A-Za-z0-9._:-]{1,128}$"
@@ -66,4 +83,3 @@
     }
   }
 }
-

@@ -21,7 +21,7 @@ from .canonical import EncodingError, Ids, digest, dumps, format_time, loads, sh
 from .errors import Refusal
 from .policy import GATEWAY_TYPES, Policy, PolicyError, meta_validator, schema_errors
 
-REQUEST_FIELDS = ("type", "task", "goal", "basis", "expected_revision", "idempotency_key", "refs", "data")
+REQUEST_FIELDS = ("type", "task", "goal", "basis", "expected_revision", "cause", "idempotency_key", "refs", "data")
 MAX_BODY = 64 * 1024
 MAX_DATA = 8 * 1024
 GATEWAY_ACTOR = {"id": "gateway", "class": "gateway"}
@@ -252,6 +252,7 @@ class Engine:
                 raise Refusal("STALE_GENERATION", "stale X-Hive-Generation")
             if req["basis"] > self.head:
                 raise Refusal("STALE_GENERATION", f"basis {req['basis']} is beyond head {self.head}")
+            self._check_cause(req)
             prior = self.idem.get((auth.actor["id"], req["idempotency_key"]))
             if prior is not None:
                 idx, dig = prior
@@ -272,7 +273,7 @@ class Engine:
         if inner is not None and inner["kind"] == "proposal":
             proposal = inner["entity"]
             fields = {k: proposal["proposed"][k] for k in ("type", "task", "goal", "expected_revision",
-                                                           "refs", "data") if k in proposal["proposed"]}
+                                                           "cause", "refs", "data") if k in proposal["proposed"]}
             fields.update(basis=req["basis"], idempotency_key=f"proposal:{proposal['id']}")
             out.append(self._append(fields, auth.actor, signature=None, via=via, verdict=None,
                                     extra={"on_proposal": proposal["id"]}))
@@ -347,6 +348,18 @@ class Engine:
         if "expected_revision" in req and "task" not in req:
             raise Refusal("SCHEMA_INVALID", "expected_revision applies to task events only")
         return rule
+
+    def _check_cause(self, req: dict) -> None:
+        """SPEC §17.5 (A5): a cited cause is an event of this hive at a position the actor had seen."""
+        ev_id = (req.get("cause") or {}).get("event")
+        if ev_id is None:
+            return
+        idx = self.by_id.get(ev_id)
+        if idx is None:
+            raise Refusal("UNKNOWN_CAUSE", f"cause {ev_id} is not an event of this hive")
+        if self.events[idx]["position"] > req["basis"]:
+            raise Refusal("UNKNOWN_CAUSE", f"cause {ev_id} is at position {self.events[idx]['position']}, "
+                                           f"beyond basis {req['basis']}")
 
     def _check_revision(self, req: dict) -> None:
         if "expected_revision" not in req:
@@ -539,6 +552,7 @@ class Engine:
             rule = self._structure(req)
             if req["basis"] > self.head:
                 raise Refusal("STALE_GENERATION", "basis beyond head")
+            self._check_cause(req)
             if code not in self.policy.waivable or not rule.exceptable:
                 raise Refusal("NOT_EXCEPTABLE", f"{code} on {rule.event} can no longer be waived")
             self._check_revision(req)

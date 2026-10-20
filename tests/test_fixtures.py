@@ -26,7 +26,7 @@ def expected_states(d: Path) -> dict[int, dict]:
 def test_all_fixtures_present():
     names = set(IDS)
     for n in ("happy-path", "review-loop", "stale-review", "block-answer", "reassign", "policy-change",
-              "mirror-mode", "mode-flip", "exception", "refusals"):
+              "mirror-mode", "mode-flip", "exception", "refusals", "routing", "cause"):
         assert f"core/{n}" in names
     for n in ("goal-happy-path", "proposals", "escalations", "reassign-restart", "budget", "refusals"):
         assert f"1-hive/{n}" in names

@@ -86,7 +86,7 @@ hive task t1
 hive events --follow
 ```
 
-For task events, `hive emit` reads the task first and sends its revision as `expected_revision` (§17.4). A refusal prints its code and exits 1; it is also recorded in the log as `gateway.rejected`.
+For task events, `hive emit` reads the task first and sends its revision as `expected_revision` (§17.4). `--cause-event <event id>` or `--cause-external <ref>` records what the event responds to (§17.5, A5): a review that answers a question, a task made from a chat message (`telegram:<chat>/<message>`). A refusal prints its code and exits 1; it is also recorded in the log as `gateway.rejected`.
 
 ## Adoption paths (§20)
 
@@ -161,4 +161,5 @@ Scratch containers run on tmpfs with `--rm`, so `down` leaves nothing behind.
 | `PIN_UNAVAILABLE` | The remote is down (retry), or `registry_mismatch` (see "Changing the registry"). |
 | `STALE_REVISION` | Someone changed the task since you read it. Re-read and decide again. |
 | `STALE_GENERATION` | The log was restored, or your `basis` is beyond the head. |
+| `UNKNOWN_CAUSE` | `cause.event` names no event of this hive, or one beyond your `basis`: you can only cite what you had seen. |
 | The gateway won't start | The log is empty (run `hive init`), or a pinned policy tree can't be materialized (check the registry and the remote). |

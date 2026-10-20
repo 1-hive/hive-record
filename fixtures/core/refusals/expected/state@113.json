@@ -52,7 +52,7 @@
       "role": "instrument",
       "role_prompt": null,
       "status": "retired",
-      "status_since": 96
+      "status_since": 97
     },
     "op": {
       "class": "operator",
@@ -151,20 +151,20 @@
     "x1": {
       "advice": [],
       "applied_event": null,
-      "decided_at": "2026-09-01T13:49:00.000000Z",
+      "decided_at": "2026-09-01T13:50:00.000000Z",
       "decided_by": "arb",
       "id": "x1",
       "reason": "hand over",
       "refusal": {
         "code": "ILLEGAL_TRANSITION",
-        "event_id": "01a05d34-8c40-7c47-b279-36ac0edc6d2b",
-        "position": 102,
+        "event_id": "01a05d35-76a0-7ad1-b61b-6fc428805c5d",
+        "position": 103,
         "task": "t1",
         "type": "task.assigned"
       },
       "requester": "coord",
       "status": "denied",
-      "status_since": 109
+      "status_since": 110
     }
   },
   "hive": {
@@ -175,14 +175,14 @@
       "source_commit": "0000000000000000000000000000000000000000",
       "version": "fixture"
     },
-    "head": 112,
+    "head": 113,
     "hive": "fixture",
     "mode": "authoritative",
     "policy": {
-      "commit_oid": "sha1:0524cc56097242fc18f137ed08246e0b686575f2",
-      "content_digest": "sha256:623f08290f0c778e85f08daee090f4ec71f07765eb699d57b2266de57aa26cb7",
+      "commit_oid": "sha1:07e580f2a1156bcc7a32b04c059464ad01d38d65",
+      "content_digest": "sha256:b4198b9409247bb4cafa42eac5e13c0bec11efc717f1016e24866c02f37dc370",
       "kind": "tree",
-      "object_oid": "sha1:ec00e05cb4f101300f3ef88f0da2b54ad74bee1e",
+      "object_oid": "sha1:2e7ce1965ccd85f4dedd443754fab979900d18a7",
       "path": "policy",
       "repository": "fixture",
       "version": 1
@@ -200,25 +200,25 @@
     },
     "p2": {
       "id": "p2",
-      "opened_at": "2026-09-01T13:27:00.000000Z",
+      "opened_at": "2026-09-01T13:28:00.000000Z",
       "status": "closed",
-      "status_since": 88,
+      "status_since": 89,
       "title": "Two"
     }
   },
   "tasks": {
     "t1": {
-      "assigned_at": "2026-09-01T12:42:00.000000Z",
+      "assigned_at": "2026-09-01T12:43:00.000000Z",
       "assigned_reviewer": "rv1",
       "block": null,
-      "created_at": "2026-09-01T12:23:00.000000Z",
+      "created_at": "2026-09-01T12:24:00.000000Z",
       "created_by": "coord",
       "current_result": {
-        "at": "2026-09-01T12:57:00.000000Z",
+        "at": "2026-09-01T12:58:00.000000Z",
         "author": "w1",
-        "event_id": "01a05d0b-5960-7b48-91a3-fd4f864a7a50",
+        "event_id": "01a05d0c-43c0-7859-8f12-75dbcfc6e625",
         "pin": {
-          "commit_oid": "sha1:0524cc56097242fc18f137ed08246e0b686575f2",
+          "commit_oid": "sha1:07e580f2a1156bcc7a32b04c059464ad01d38d65",
           "content_digest": "sha256:a7cd6668b2f53361ac83fff727e4e8ae11b6f8bebc08f324b6e974fdf5a82d98",
           "kind": "file",
           "mode": "100644",
@@ -227,21 +227,21 @@
           "repository": "fixture",
           "version": 1
         },
-        "position": 57
+        "position": 58
       },
       "exceptions_applied": 0,
       "ext": {},
       "goal": null,
       "id": "t1",
       "last_activity": {
-        "at": "2026-09-01T13:47:00.000000Z",
-        "position": 107
+        "at": "2026-09-01T13:48:00.000000Z",
+        "position": 108
       },
       "latest_review": {
-        "event_id": "01a05d11-c200-7b34-bee0-a183eabca8d0",
-        "position": 64,
+        "event_id": "01a05d12-ac60-7cb1-8545-995c5b7c709a",
+        "position": 65,
         "review_pin": {
-          "commit_oid": "sha1:0524cc56097242fc18f137ed08246e0b686575f2",
+          "commit_oid": "sha1:07e580f2a1156bcc7a32b04c059464ad01d38d65",
           "content_digest": "sha256:d83a3016607851656eb03e37796c636b745b99b4435b564bbe88c421c4d2bc8c",
           "kind": "file",
           "mode": "100644",
@@ -254,7 +254,7 @@
         "verdict": "failed"
       },
       "order": {
-        "commit_oid": "sha1:0524cc56097242fc18f137ed08246e0b686575f2",
+        "commit_oid": "sha1:07e580f2a1156bcc7a32b04c059464ad01d38d65",
         "content_digest": "sha256:b2dde536a6f1aa0dbf24160f57dcabb606df084e9493a948b3e452eda3535132",
         "kind": "file",
         "mode": "100644",
@@ -270,22 +270,22 @@
       "reviews_failed_count": 1,
       "revision": 10,
       "status": "in_progress",
-      "status_since": 85,
+      "status_since": 86,
       "title": "Task",
       "violations": 0
     },
     "t2": {
-      "assigned_at": "2026-09-01T13:07:00.000000Z",
+      "assigned_at": "2026-09-01T13:08:00.000000Z",
       "assigned_reviewer": null,
       "block": null,
-      "created_at": "2026-09-01T13:06:00.000000Z",
+      "created_at": "2026-09-01T13:07:00.000000Z",
       "created_by": "coord",
       "current_result": {
-        "at": "2026-09-01T13:14:00.000000Z",
+        "at": "2026-09-01T13:15:00.000000Z",
         "author": "rv1",
-        "event_id": "01a05d1a-e9c0-7c87-b6bd-9b172577bffa",
+        "event_id": "01a05d1b-d420-7b29-82e5-1d6c38018b47",
         "pin": {
-          "commit_oid": "sha1:0524cc56097242fc18f137ed08246e0b686575f2",
+          "commit_oid": "sha1:07e580f2a1156bcc7a32b04c059464ad01d38d65",
           "content_digest": "sha256:d4758fc016ecbeecdc267ac2de628a8f7a2ed0c020ad1fd6b962b2642ef16c4c",
           "kind": "file",
           "mode": "100644",
@@ -294,21 +294,21 @@
           "repository": "fixture",
           "version": 1
         },
-        "position": 74
+        "position": 75
       },
       "exceptions_applied": 0,
       "ext": {},
       "goal": null,
       "id": "t2",
       "last_activity": {
-        "at": "2026-09-01T13:14:00.000000Z",
-        "position": 74
+        "at": "2026-09-01T13:15:00.000000Z",
+        "position": 75
       },
       "latest_review": {
-        "event_id": "01a05d1d-a8e0-7e8f-a230-4cabefbfc19e",
-        "position": 77,
+        "event_id": "01a05d1e-9340-79a2-84bc-5d7fae3b16ec",
+        "position": 78,
         "review_pin": {
-          "commit_oid": "sha1:0524cc56097242fc18f137ed08246e0b686575f2",
+          "commit_oid": "sha1:07e580f2a1156bcc7a32b04c059464ad01d38d65",
           "content_digest": "sha256:a6104fb26a67fd6a872d982e511e340ab52074f91920bddeaf85105a14dca99c",
           "kind": "file",
           "mode": "100644",
@@ -321,7 +321,7 @@
         "verdict": "passed"
       },
       "order": {
-        "commit_oid": "sha1:0524cc56097242fc18f137ed08246e0b686575f2",
+        "commit_oid": "sha1:07e580f2a1156bcc7a32b04c059464ad01d38d65",
         "content_digest": "sha256:1d73910e1c13e4addef8e58a4718e104b02e82c475ec1c299eb6f835351c5e49",
         "kind": "file",
         "mode": "100644",
@@ -337,7 +337,7 @@
       "reviews_failed_count": 1,
       "revision": 9,
       "status": "done",
-      "status_since": 78,
+      "status_since": 79,
       "title": "Task",
       "violations": 0
     }

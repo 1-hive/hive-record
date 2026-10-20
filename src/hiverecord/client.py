@@ -127,7 +127,8 @@ class Client:
 
     def emit(self, type_: str, *, data: dict | None = None, refs: list[dict] | None = None,
              task: str | None = None, goal: str | None = None, expected_revision: int | None = None,
-             idempotency_key: str | None = None, basis: int | None = None) -> dict:
+             idempotency_key: str | None = None, basis: int | None = None,
+             cause: dict | None = None) -> dict:
         """Submit a request; raise HiveError unless it is accepted (or a duplicate)."""
         if basis is None:
             if self.head is None:
@@ -135,6 +136,8 @@ class Client:
             basis = self.head
         req = {"type": type_, "basis": basis, "idempotency_key": idempotency_key or new_key(),
                "refs": refs or [], "data": data or {}}
+        if cause:
+            req["cause"] = cause
         if task is not None:
             req["task"] = task
         if goal is not None:

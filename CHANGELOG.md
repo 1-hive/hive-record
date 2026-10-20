@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.3.0] — 2026-10-20
+
+Amendment A5 (SPEC Appendix D): every request may carry a `cause`, the event or the outside reference it responds to; a cited event must exist at a position the actor had seen (`UNKNOWN_CAUSE`). Recorded, never used to decide. Core legality table 1.3.0 (one new code); `hive emit --cause-event`, `--cause-external`; fixture `core/cause`; every fixture rebuilt for the new policy pin.
+
 ## [1.2.0] — 2026-10-13
 
 Amendment A4 (SPEC Appendix D): `route.decided` takes an optional `runtime`, where the attempt ran. Core legality table 1.2.0; fixture `core/routing` covers it; every fixture rebuilt for the new policy pin.

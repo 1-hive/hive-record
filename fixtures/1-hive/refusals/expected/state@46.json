@@ -174,7 +174,7 @@
       },
       "escalation": null,
       "goal_pin": {
-        "commit_oid": "sha1:0524cc56097242fc18f137ed08246e0b686575f2",
+        "commit_oid": "sha1:07e580f2a1156bcc7a32b04c059464ad01d38d65",
         "content_digest": "sha256:50260a857561cd0c749118bf0a7183230a8c6056d12f3c92c00dd3a02c34fc1d",
         "kind": "file",
         "mode": "100644",
@@ -213,10 +213,10 @@
     "hive": "fixture",
     "mode": "authoritative",
     "policy": {
-      "commit_oid": "sha1:0524cc56097242fc18f137ed08246e0b686575f2",
-      "content_digest": "sha256:623f08290f0c778e85f08daee090f4ec71f07765eb699d57b2266de57aa26cb7",
+      "commit_oid": "sha1:07e580f2a1156bcc7a32b04c059464ad01d38d65",
+      "content_digest": "sha256:b4198b9409247bb4cafa42eac5e13c0bec11efc717f1016e24866c02f37dc370",
       "kind": "tree",
-      "object_oid": "sha1:ec00e05cb4f101300f3ef88f0da2b54ad74bee1e",
+      "object_oid": "sha1:2e7ce1965ccd85f4dedd443754fab979900d18a7",
       "path": "policy",
       "repository": "fixture",
       "version": 1
@@ -286,7 +286,7 @@
       },
       "latest_review": null,
       "order": {
-        "commit_oid": "sha1:0524cc56097242fc18f137ed08246e0b686575f2",
+        "commit_oid": "sha1:07e580f2a1156bcc7a32b04c059464ad01d38d65",
         "content_digest": "sha256:b2dde536a6f1aa0dbf24160f57dcabb606df084e9493a948b3e452eda3535132",
         "kind": "file",
         "mode": "100644",
@@ -317,7 +317,7 @@
         "author": "w1",
         "event_id": "01a05cf3-8ba0-7eac-8e30-658b9148624f",
         "pin": {
-          "commit_oid": "sha1:0524cc56097242fc18f137ed08246e0b686575f2",
+          "commit_oid": "sha1:07e580f2a1156bcc7a32b04c059464ad01d38d65",
           "content_digest": "sha256:a7cd6668b2f53361ac83fff727e4e8ae11b6f8bebc08f324b6e974fdf5a82d98",
           "kind": "file",
           "mode": "100644",
@@ -354,7 +354,7 @@
       },
       "latest_review": null,
       "order": {
-        "commit_oid": "sha1:0524cc56097242fc18f137ed08246e0b686575f2",
+        "commit_oid": "sha1:07e580f2a1156bcc7a32b04c059464ad01d38d65",
         "content_digest": "sha256:b2dde536a6f1aa0dbf24160f57dcabb606df084e9493a948b3e452eda3535132",
         "kind": "file",
         "mode": "100644",
