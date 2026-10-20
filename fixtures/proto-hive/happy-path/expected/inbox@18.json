@@ -1,0 +1,14 @@
+{
+  "arbiter": [],
+  "chief_of_staff": [
+    {
+      "entity": "task",
+      "id": "t1",
+      "key": "task_passed_not_closed:t1:18",
+      "kind": "task_passed_not_closed",
+      "position": 18,
+      "title": "Build it"
+    }
+  ],
+  "operator": []
+}

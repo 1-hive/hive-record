@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.4.0] — 2026-10-20
+
+Amendment A6 (SPEC Part III, Appendix D): the `proto-hive` profile 1.0.0, `1-hive` without goals, for hives whose work is assigned only through a chief of staff. No code change; fixture `proto-hive/happy-path`; every fixture rebuilt for the new policy pin.
+
 ## [1.3.0] — 2026-10-20
 
 Amendment A5 (SPEC Appendix D): every request may carry a `cause`, the event or the outside reference it responds to; a cited event must exist at a position the actor had seen (`UNKNOWN_CAUSE`). Recorded, never used to decide. Core legality table 1.3.0 (one new code); `hive emit --cause-event`, `--cause-external`; fixture `core/cause`; every fixture rebuilt for the new policy pin.

@@ -1,0 +1,361 @@
+{
+ "schema": "hive.profile/1",
+ "name": "proto-hive",
+ "version": "1.0.0",
+ "extends": "core@1",
+ "add_classes": [
+  "chief_of_staff",
+  "supervisor"
+ ],
+ "add_rels": [
+  "context",
+  "diagnosis",
+  "code",
+  "base"
+ ],
+ "repeatable_rels": [
+  "code",
+  "base"
+ ],
+ "ancestry": [
+  {
+   "ancestor": "base",
+   "descendant": "code",
+   "code": "CODE_BASE_INVALID"
+  }
+ ],
+ "add_codes": [
+  "INVALID_REVIEW_TARGET",
+  "NOT_ESCALATED",
+  "UNKNOWN_PROPOSAL",
+  "PROPOSAL_EXISTS",
+  "PROPOSAL_NOT_PENDING",
+  "PROPOSAL_NOT_APPLICABLE",
+  "CODE_MISSING",
+  "CODE_OUT_OF_SCOPE",
+  "CODE_BASE_INVALID"
+ ],
+ "waivable_codes": [],
+ "entities": {
+  "proposal": {
+   "collection": "proposals",
+   "id": "data.proposal_id",
+   "state_field": "status",
+   "states": [
+    "pending",
+    "approved",
+    "rejected",
+    "withdrawn"
+   ],
+   "terminal": [
+    "approved",
+    "rejected",
+    "withdrawn"
+   ],
+   "unknown_code": "UNKNOWN_PROPOSAL",
+   "exists_code": "PROPOSAL_EXISTS",
+   "illegal_code": "PROPOSAL_NOT_PENDING",
+   "mirrorable": false
+  }
+ },
+ "rules": [
+  {
+   "event": "proposal.submitted",
+   "entity": "proposal",
+   "classes": "*",
+   "relation": null,
+   "from": null,
+   "to": "pending",
+   "refs": {
+    "required": [],
+    "allowed": [
+     "rationale"
+    ]
+   },
+   "conditions": [
+    "proposed_request_well_formed"
+   ],
+   "effects": [
+    "create_proposal"
+   ]
+  },
+  {
+   "event": "proposal.approved",
+   "entity": "proposal",
+   "classes": [
+    "operator",
+    "chief_of_staff",
+    "coordinator"
+   ],
+   "relation": null,
+   "from": [
+    "pending"
+   ],
+   "to": "approved",
+   "refs": {
+    "required": [],
+    "allowed": []
+   },
+   "conditions": [
+    "approver_matches",
+    "proposal_applicable"
+   ],
+   "effects": [
+    "decide_proposal"
+   ]
+  },
+  {
+   "event": "proposal.rejected",
+   "entity": "proposal",
+   "classes": [
+    "operator",
+    "chief_of_staff",
+    "coordinator"
+   ],
+   "relation": null,
+   "from": [
+    "pending"
+   ],
+   "to": "rejected",
+   "refs": {
+    "required": [],
+    "allowed": []
+   },
+   "conditions": [
+    "approver_matches"
+   ],
+   "effects": [
+    "decide_proposal"
+   ]
+  },
+  {
+   "event": "proposal.withdrawn",
+   "entity": "proposal",
+   "classes": "*",
+   "relation": "proposer",
+   "from": [
+    "pending"
+   ],
+   "to": "withdrawn",
+   "refs": {
+    "required": [],
+    "allowed": []
+   },
+   "conditions": [],
+   "effects": [
+    "decide_proposal"
+   ]
+  },
+  {
+   "event": "task.nudged",
+   "entity": "task",
+   "classes": [
+    "supervisor"
+   ],
+   "relation": null,
+   "from": [
+    "assigned",
+    "in_progress",
+    "blocked",
+    "in_review"
+   ],
+   "to": "same",
+   "refs": {
+    "required": [],
+    "allowed": [
+     "diagnosis"
+    ]
+   },
+   "conditions": [],
+   "effects": [
+    "count_nudge"
+   ]
+  },
+  {
+   "event": "task.restarted",
+   "entity": "task",
+   "classes": [
+    "supervisor"
+   ],
+   "relation": null,
+   "from": [
+    "assigned",
+    "in_progress",
+    "blocked"
+   ],
+   "to": "same",
+   "refs": {
+    "required": [
+     "context"
+    ],
+    "allowed": [
+     "diagnosis"
+    ]
+   },
+   "conditions": [],
+   "effects": [
+    "increment_attempt"
+   ]
+  },
+  {
+   "event": "task.escalated",
+   "entity": "task",
+   "classes": [
+    "supervisor",
+    "chief_of_staff",
+    "worker",
+    "reviewer"
+   ],
+   "relation": "owner",
+   "from": "open",
+   "to": "same",
+   "refs": {
+    "required": [],
+    "allowed": [
+     "diagnosis"
+    ]
+   },
+   "conditions": [],
+   "effects": [
+    "open_escalation"
+   ]
+  },
+  {
+   "event": "task.escalation_resolved",
+   "entity": "task",
+   "classes": [
+    "chief_of_staff",
+    "operator"
+   ],
+   "relation": null,
+   "from": "*",
+   "to": "same",
+   "refs": {
+    "required": [],
+    "allowed": []
+   },
+   "conditions": [
+    "is_escalated"
+   ],
+   "effects": [
+    "close_escalation"
+   ]
+  }
+ ],
+ "amend": {
+  "project.opened": {
+   "add_classes": [
+    "chief_of_staff"
+   ]
+  },
+  "task.created": {
+   "add_classes": [
+    "chief_of_staff"
+   ],
+   "add_conditions": [
+    "review_task_target_valid"
+   ],
+   "add_effects": [
+    "init_task_ext"
+   ]
+  },
+  "task.assigned": {
+   "add_classes": [
+    "chief_of_staff"
+   ],
+   "require_ext": [
+    "lease"
+   ],
+   "add_conditions": [
+    "review_task_assignee_not_author"
+   ],
+   "add_effects": [
+    "set_lease"
+   ]
+  },
+  "task.reassigned": {
+   "add_classes": [
+    "chief_of_staff",
+    "supervisor"
+   ],
+   "require_ext": [
+    "lease"
+   ],
+   "add_conditions": [
+    "review_task_assignee_not_author"
+   ],
+   "add_effects": [
+    "set_lease"
+   ]
+  },
+  "task.answered": {
+   "add_classes": [
+    "chief_of_staff"
+   ]
+  },
+  "task.closed": {
+   "add_classes": [
+    "chief_of_staff"
+   ]
+  },
+  "review.assigned": {
+   "add_classes": [
+    "chief_of_staff"
+   ]
+  },
+  "task.cancelled": {
+   "add_classes": [
+    "chief_of_staff"
+   ]
+  },
+  "task.reported": {
+   "add_effects": [
+    "add_cost"
+   ]
+  },
+  "task.result_posted": {
+   "add_refs": {
+    "required": [],
+    "allowed": [
+     "code",
+     "base"
+    ]
+   },
+   "add_conditions": [
+    "code_matches_repos"
+   ],
+   "add_effects": [
+    "add_cost"
+   ]
+  },
+  "review.recorded": {
+   "add_effects": [
+    "add_cost"
+   ]
+  }
+ },
+ "hooks": {
+  "on_touch": [
+   "reset_nudges"
+  ],
+  "on_terminal": [
+   "close_escalation"
+  ]
+ },
+ "inbox": {
+  "operator": [
+   "proposal_pending",
+   "escalation_open",
+   "exception_pending"
+  ],
+  "chief_of_staff": [
+   "proposal_pending",
+   "escalation_open",
+   "task_blocked_unanswered_any",
+   "task_passed_not_closed"
+  ],
+  "arbiter": [
+   "exception_pending"
+  ]
+ }
+}

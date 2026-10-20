@@ -95,7 +95,7 @@ For task events, `hive emit` reads the task first and sends its revision as `exp
    ```bash
    hive emit hive.mode_changed --data '{"mode":"authoritative"}'
    ```
-3. **Opt into an extension.** Re-pin the policy with a profile, e.g. `1-hive`:
+3. **Opt into an extension.** Re-pin the policy with a profile, e.g. `1-hive` (goals, leases, supervision, cost) or `proto-hive` (the same without goals: no approvals, the order carries the goal):
    ```bash
    hive emit hive.policy_changed --ref policy=policy.pin --data '{"profile":"1-hive","reason":"adopt goals"}'
    ```

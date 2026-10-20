@@ -729,6 +729,53 @@ def proposals(fx: FixtureRepo) -> Scenario:
     return s
 
 
+def proto_setup(s: Scenario) -> None:
+    s.init()
+    s.register("cos", "chief_of_staff")
+    s.register("sup", "supervisor")
+    for a, c in (("w1", "worker"), ("w2", "worker"), ("rv1", "reviewer")):
+        s.register(a, c)
+    s.req("cos", "project.opened", data={"project": "p1", "title": "Project one"})
+
+
+def proto_happy_path(fx: FixtureRepo) -> Scenario:
+    """The proto-hive profile: 1-hive's leases, supervision, cost and proposals, with no goals; a task's
+    order carries its goal, and the chief of staff cites the chat message it came from (A5)."""
+    s = Scenario(fx, profile="proto-hive")
+    proto_setup(s)
+    s.req("cos", "task.created", task="t1", goal="g1", data={"title": "Build it", "project": "p1"},
+          refs=[("order", "order-1")], expect="SCHEMA_INVALID")                    # no goals in this profile
+    s.req("cos", "task.created", task="t1", data={"title": "Build it", "project": "p1", "ext": {"repos": []}},
+          refs=[("order", "order-1")], fields={"cause": {"external": "telegram:-5437945421/10588"}})
+    s.req("cos", "task.assigned", task="t1", data={"to": "w1"}, expect="SCHEMA_INVALID")   # a lease is required
+    s.req("cos", "task.assigned", task="t1", data={"to": "w1", "ext": LEASE}, fields={"cause": {"event": s.last_id()}})
+    s.req("w1", "task.accepted", task="t1", fields={"cause": {"event": s.last_id()}})
+    s.snapshot()
+    s.req("sup", "task.nudged", task="t1", data={"reason": "no check-in for 40 minutes"})
+    s.req("w1", "task.reported", task="t1", data={"kind": "checkpoint", "ext": {"cost": {"usd_micros": 150_000, "tokens": 12_000}}},
+          refs=[("report", "report-1")])
+    s.req("w1", "task.result_posted", task="t1", refs=[("result", "result-1")],
+          data={"ext": {"cost": {"usd_micros": 50_000, "tokens": 3_000, "wall_clock_seconds": 600}}})
+    s.req("cos", "review.assigned", task="t1", data={"reviewer": "rv1", "result_event": s.result_event("t1")},
+          fields={"cause": {"event": s.last_id()}})
+    s.req("rv1", "review.recorded", task="t1", data={"verdict": "passed", "result_event": s.result_event("t1"),
+          "ext": {"cost": {"usd_micros": 20_000, "tokens": 2_000}}}, refs=[("review", "review-1")])
+    s.snapshot()
+    s.req("cos", "task.closed", task="t1", rev=s.task("t1")["revision"], fields={"cause": {"event": s.last_id()}})
+    # supervision and proposals work without a goal
+    s.req("cos", "task.created", task="t2", data={"title": "Next", "project": "p1"}, refs=[("order", "order-2")])
+    s.req("cos", "task.assigned", task="t2", data={"to": "w1", "ext": LEASE})
+    s.req("sup", "task.reassigned", task="t2", data={"to": "w2", "reason": "w1 is silent", "ext": LEASE})
+    s.req("sup", "task.escalated", task="t2", data={"to": "chief_of_staff", "code": "stuck", "reason": "no acceptance"})
+    s.req("cos", "task.escalation_resolved", task="t2", data={"resolution": "w2 pinged"})
+    new_task = {"type": "task.created", "task": "t3", "basis": s.r.engine.head, "idempotency_key": "want-t3",
+                "refs": [{"rel": "order", "pin": fx.pin("order-3")}], "data": {"title": "Split out the parser", "project": "p1"}}
+    s.req("w2", "proposal.submitted", data={"proposal_id": "pr1", "proposed": new_task, "approver_class": "chief_of_staff"})
+    s.req("cos", "proposal.approved", data={"proposal_id": "pr1"})          # appends two events
+    s.req("cos", "task.cancelled", task="t2", data={"reason": "re-planned"})
+    return s
+
+
 def escalations(fx: FixtureRepo) -> Scenario:
     s = Scenario(fx, profile="1-hive")
     hive1_setup(s)
@@ -906,6 +953,7 @@ SCENARIOS = {
     "core/refusals": core_refusals,
     "core/routing": routing,
     "core/cause": cause,
+    "proto-hive/happy-path": proto_happy_path,
     "1-hive/goal-happy-path": goal_happy_path,
     "1-hive/proposals": proposals,
     "1-hive/escalations": escalations,

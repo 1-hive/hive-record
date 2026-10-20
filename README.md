@@ -7,17 +7,17 @@ The hive record for One Hive, releases **R1** (an append-only event log behind a
 - **Signed.** Every request is signed with its actor's own ed25519 key. Signatures are stored with the events, so anyone holding an export can re-verify who asked for what.
 - **One rule, two uses.** A pinned legality table drives both the gate (what is admitted) and the fold (what state results), so they can't disagree. A task reaches `done` only after an independent, assigned reviewer passes its current result.
 - **Exceptions, on the record.** A move the rules wrongly refuse can be admitted exactly as sent, after a recorded grant by an operator or arbiter. Authority, pins and the review gate are never waived.
-- **Core plus profiles.** Every hive runs the core. The `1-hive` profile adds goals, proposals, leases, supervision and cost. Extensions may only add or tighten.
+- **Core plus profiles.** Every hive runs the core. The `1-hive` profile adds goals, proposals, leases, supervision and cost; the `proto-hive` profile is the same without goals. Extensions may only add or tighten.
 
-Status: spec **v1.0, frozen** ([`SPEC.md`](SPEC.md), amendments A1–A5), with the reference implementation `hiverecord` **1.3.0**. 1.0.0 was released after its first real adoption: [`docs/adoption/1-hive.md`](docs/adoption/1-hive.md). 1.1.0 adds amendment A3: R0 pin format v2, and `code` and `base` refs on 1-hive results. 1.2.0 adds A4: the runtime on `route.decided`. 1.3.0 adds A5: an optional `cause` on every event.
+Status: spec **v1.0, frozen** ([`SPEC.md`](SPEC.md), amendments A1–A6), with the reference implementation `hiverecord` **1.4.0**. 1.0.0 was released after its first real adoption: [`docs/adoption/1-hive.md`](docs/adoption/1-hive.md). 1.1.0 adds amendment A3: R0 pin format v2, and `code` and `base` refs on 1-hive results. 1.2.0 adds A4: the runtime on `route.decided`. 1.3.0 adds A5: an optional `cause` on every event. 1.4.0 adds A6: the `proto-hive` profile.
 
 ## Layout
 
 | Path | Contents |
 |---|---|
-| [`SPEC.md`](SPEC.md) | The normative specification: Part I (core), Part II (the `1-hive` profile) |
+| [`SPEC.md`](SPEC.md) | The normative specification: Part I (core), Part II (the `1-hive` profile), Part III (the `proto-hive` profile) |
 | [`schemas/`](schemas/) | Request, envelope, legality-table and profile schemas |
-| [`policy/`](policy/) | The v1 policy tree: `core/` (legality table, per-event schemas) and `profiles/1-hive/` |
+| [`policy/`](policy/) | The v1 policy tree: `core/` (legality table, per-event schemas), `profiles/1-hive/` and `profiles/proto-hive/` |
 | [`fixtures/`](fixtures/) | Golden conformance fixtures, `make-repo.sh` and `build.py` |
 | `src/hiverecord/` | The gateway, fold engine, `hive` CLI and migrations |
 | [`docs/OPERATOR_GUIDE.md`](docs/OPERATOR_GUIDE.md) | Running a hive, adoption paths, backups |

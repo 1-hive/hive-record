@@ -939,6 +939,21 @@ The core inbox's operator items move to the chief of staff: in this profile, hum
 
 ---
 
+# Part III — The `proto-hive` profile (extension v1)
+
+Normative only for hives that pin the `proto-hive` profile. Added for Ben Goertzel's proto-hive (2026-10-20), the second hive on the record: long-lived chat agents whose work is assigned only through a chief of staff, with no separate approval of goals.
+
+## 28. The profile
+
+`proto-hive` 1.0.0 is the `1-hive` profile without goals:
+
+- **Kept from Part II:** the `chief_of_staff` and `supervisor` classes (§24.1); leases on assignment (§24.4); supervision, `task.nudged`, `task.restarted`, `task.escalated` and `task.escalation_resolved` (§24.5); proposals (§24.6); cost on reports, results and reviews (§24.4); `code` and `base` refs with the ancestry check (§24.7); the `context`, `diagnosis`, `code` and `base` rels; the hooks and the inbox rules that don't concern goals.
+- **Dropped:** the `goal` entity and every `goal.*` event; `require_goal` and `goal_active` on `task.created`; `project_has_no_open_goals` on `project.closed`; the `goal` and `summary` rels; the goal codes and `BUDGET_RAISE_REQUIRES_OPERATOR`; the goal inbox items. A request carrying `goal` is refused (`SCHEMA_INVALID`), as under the core.
+- **Where the goal went:** into the order. An order under this profile states the task's goal, acceptance criteria and relevance line (Ben's *WorkOrder*: `goal`, `criteria_ref`, `remains_useless_if`). Cost is tracked per task (`ext.spent`); no budget is enforced.
+- **Causes (A5):** the chief of staff cites the chat message a task came from (`cause.external`), the assignment cites the creation, the review cites the result it judges, and the close cites the passing review. This is practice, not a rule.
+
+Fixtures: `proto-hive/happy-path`.
+
 ## Appendix A. Changes from the 1-hive plan (`1-hive/PLAN.md`)
 
 - **One log per hive** with a global position, instead of per-run logs. Actors are hive-wide. Projects group work. Scratch runs become scratch hives. `run.*` events become `hive.*` and `project.*`.
@@ -1035,3 +1050,11 @@ Every request may carry `cause`: the event it responds to (`event`, an `event_id
 - **Recorded, never used to decide.** No rule, state or condition reads it; a cause grants no authority.
 - **Compatibility:** a client must send it only to a gateway of 1.3.0 or later; earlier gateways refuse it (`SCHEMA_INVALID`). A log with causes re-verifies only with 1.3.0 or later, because the signature covers the field. Proposals may carry it in their proposed request, and the applied event keeps it; an event applied from an exception keeps the refused request's cause.
 - **Fixtures:** new `core/cause`: a cause by event and by external reference, a cause on a proposed and an exception-applied request, and refusals for an unknown event, an event beyond `basis` and an empty cause; every fixture rebuilt for the new policy pin.
+
+### A6. The `proto-hive` profile
+
+**Date:** 2026-10-20. **Changes:** new Part III (§28); the policy tree gains `profiles/proto-hive/` 1.0.0. **Kind:** additive to the tree; the core and the `1-hive` profile are unchanged.
+
+A second profile, for a hive whose work is assigned only through a chief of staff and whose operator doesn't approve goals: `1-hive` minus the goal entity, with the task's goal carried by its order. Hives that pin `core` or `1-hive` see no change.
+
+- **Fixtures:** new `proto-hive/happy-path`; every fixture rebuilt for the new policy pin.

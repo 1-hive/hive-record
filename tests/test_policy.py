@@ -20,10 +20,12 @@ def test_core_and_1hive_load():
     assert set(core.rules) < set(one.rules)
     assert "chief_of_staff" in one.rules["task.closed"].classes
     assert "chief_of_staff" not in core.classes
+    proto = load_policy(POLICY, "proto-hive")
+    assert set(core.rules) < set(proto.rules) < set(one.rules) and not proto.rules["task.created"].require_goal
 
 
 def test_one_rule_and_one_schema_per_type():
-    for profile in ("core", "1-hive"):
+    for profile in ("core", "1-hive", "proto-hive"):
         p = load_policy(POLICY, profile)
         assert set(p.rules) == set(p.data_schemas)
 
@@ -135,7 +137,7 @@ def test_forbid_exceptions_tightens(tree):
 
 
 def test_review_gate_is_never_exceptable():
-    for profile in ("core", "1-hive"):
+    for profile in ("core", "1-hive", "proto-hive"):
         p = load_policy(POLICY, profile)
         assert not any(p.rules[t].exceptable for t in ("review.assigned", "review.recorded", "task.closed"))
         assert not {"NOT_AUTHORIZED", "NOT_OWNER", "REVIEW_REQUIRED", "PIN_INVALID", "STALE_REVISION"} & p.waivable

@@ -30,6 +30,7 @@ def test_all_fixtures_present():
         assert f"core/{n}" in names
     for n in ("goal-happy-path", "proposals", "escalations", "reassign-restart", "budget", "refusals"):
         assert f"1-hive/{n}" in names
+    assert "proto-hive/happy-path" in names
 
 
 @pytest.mark.parametrize("d", DIRS, ids=IDS)
