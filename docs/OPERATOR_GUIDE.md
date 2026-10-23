@@ -122,6 +122,8 @@ python -c 'from hiverecord.pins import registry_digest; print(registry_digest("r
 hive emit hive.registry_changed --data '{"registry_digest":"sha256:…","reason":"add the docs repo"}'
 ```
 
+Any edit counts, including registering repositories in bulk or regenerating the file: until the digest is recorded, agents can't post results or orders, and the refusals say `registry_mismatch` (the proto-hive met this the day it switched over). A deployment script can catch it: right after restarting the gateway, its log says the registry differs from the recorded one.
+
 ## Rotating and revoking keys
 
 ```bash
