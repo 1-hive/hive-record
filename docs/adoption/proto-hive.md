@@ -46,7 +46,7 @@ The proto-hive is Ben Goertzel's hive of long-lived chat bots, and the first hiv
 ## Where the proto-hive falls short
 
 - It does **not** conform to SPEC §6.6 (key custody): the agents share an OS user on pop-os and a container on vm2. Keys are held apart, but an event signed by a pop-os bot proves only that some process on that machine asked its sidecar. The deviation is declared in each actor's declaration.
-- **Staging holds only where the bots have no GitHub credentials of their own.** On 2026-10-28 the first staged task from pop-os was pushed by the bot straight to GitHub, as the account owner, with credentials its OS user can reach; the hive copy got nothing and the reviewer found the work on GitHub. Nothing was merged, but the review-before-publishing rule held only by the bots' instructions there.
+- **Staging holds only where the bots have no GitHub credentials of their own.** On 2026-10-28 the first staged task from pop-os was pushed by the bot straight to GitHub, as the account owner, with credentials its OS user can reach; the hive copy got nothing and the reviewer found the work on GitHub. Nothing was merged. The same day the bots' OS user lost that login (the owner's own login stays), so on pop-os the rule no longer rests on the bots' instructions alone; one vm2 bot can still reach the owner's raw credentials.
 - **Publishing depends on one reviewer.** When Astra is down, reviewed work stops short of GitHub (results wait in the hive copies) and every task waits.
 - **The chief of staff can reach a worker only through a blocked task.** After a failed review, what it knows waits until the worker asks.
 
