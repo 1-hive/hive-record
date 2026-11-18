@@ -21,6 +21,12 @@
           "minimum": 0
         }
       }
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "A7: the model that wrote this event's content, as the actor's harness reported it; absent when unknown."
     }
   }
 }

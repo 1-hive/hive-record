@@ -846,6 +846,7 @@ To re-verify an applied event, check that the event before it is a signed `propo
 | `task.cancelled` | + class chief_of_staff |
 | `task.reported`, `task.result_posted`, `review.recorded` | ext: optional `cost` {usd_micros?, tokens?, wall_clock_seconds?}, the cost since the same actor's previous cost report on this task; + effect `add_cost` |
 | `task.result_posted` | A3: refs `code`, `base` allowed; + `code_matches_repos`; ancestry `base` → `code` (`CODE_BASE_INVALID`) |
+| `task.blocked`, `task.reported`, `task.result_posted`, `review.recorded` | A7: ext: optional `model` (1–100 characters), the model that wrote the event's content |
 | `project.closed` | + `project_has_no_open_goals` |
 
 **Review tasks.** A task with `ext.kind: review` reviews another task (`ext.reviews_task`), which must be under the same goal and `in_review`. Its result pin is the review document, and it closes like any task. When the chief of staff assigns a review task, it also emits `review.assigned` on the reviewed task, naming the same reviewer. That makes the review task's owner the assigned reviewer. It records the verdict on the reviewed task with `review.recorded`. This lets review work be assigned, supervised and restarted.
@@ -950,6 +951,7 @@ Normative only for hives that pin the `proto-hive` profile. Added for Ben Goertz
 - **Kept from Part II:** the `chief_of_staff` and `supervisor` classes (§24.1); leases on assignment (§24.4); supervision, `task.nudged`, `task.restarted`, `task.escalated` and `task.escalation_resolved` (§24.5); proposals (§24.6); cost on reports, results and reviews (§24.4); `code` and `base` refs with the ancestry check (§24.7); the `context`, `diagnosis`, `code` and `base` rels; the hooks and the inbox rules that don't concern goals.
 - **Dropped:** the `goal` entity and every `goal.*` event; `require_goal` and `goal_active` on `task.created`; `project_has_no_open_goals` on `project.closed`; the `goal` and `summary` rels; the goal codes and `BUDGET_RAISE_REQUIRES_OPERATOR`; the goal inbox items. A request carrying `goal` is refused (`SCHEMA_INVALID`), as under the core.
 - **Where the goal went:** into the order. An order under this profile states the task's goal, acceptance criteria and relevance line (Ben's *WorkOrder*: `goal`, `criteria_ref`, `remains_useless_if`). Cost is tracked per task (`ext.spent`); no budget is enforced.
+- **Models (A7):** questions, reports, results and reviews may name the model that wrote them (`ext.model`, §24.6), as in `1-hive` 1.2.0; `proto-hive` 1.1.0.
 - **Causes (A5):** the chief of staff cites the chat message a task came from (`cause.external`), the assignment cites the creation, the review cites the result it judges, and the close cites the passing review. This is practice, not a rule.
 
 Fixtures: `proto-hive/happy-path`.
@@ -1058,3 +1060,13 @@ Every request may carry `cause`: the event it responds to (`event`, an `event_id
 A second profile, for a hive whose work is assigned only through a chief of staff and whose operator doesn't approve goals: `1-hive` minus the goal entity, with the task's goal carried by its order. Hives that pin `core` or `1-hive` see no change.
 
 - **Fixtures:** new `proto-hive/happy-path`; every fixture rebuilt for the new policy pin.
+
+### A7. The model that wrote an event
+
+**Date:** 2026-11-18. **Changes:** §24.6 (one row), §28; the `1-hive` profile 1.2.0 and the `proto-hive` profile 1.1.0 (ext schemas of `task.blocked`, new, and `task.reported`, `task.result_posted`, `review.recorded`). **Kind:** behavior change, additive: one optional ext field; the core, existing events and logs are unchanged.
+
+A question, report, result or review may carry `ext.model`: the model that wrote its content, as the actor's harness reported it (e.g. `claude-opus-5-5`, `anthropic/claude-sonnet-5-5`), 1 to 100 characters. An actor that doesn't know which model wrote it leaves the field out rather than guessing; an empty value is refused (`SCHEMA_INVALID`). Found in the proto-hive, where the operators read which model wrote each chat message and wanted the same for work that reaches them through the record (the Telegram bridge shows it as `[<model>]`). The actor declaration's `model_route` (§9) is set per attempt or at registration, so it can't say which model wrote a given event.
+
+- **Recorded, never used to decide.** No rule, state or condition reads it. It is the actor's report: a model gateway can check it after the fact, the record can't.
+- **Compatibility:** a client must send it only to a hive whose policy has `1-hive` 1.2.0 or `proto-hive` 1.1.0 or later; earlier profiles refuse it (`SCHEMA_INVALID`). A hive moves with `hive.policy_changed`.
+- **Fixtures:** `proto-hive/happy-path` carries it on a question, report, result and review and refuses an empty one; `1-hive/goal-happy-path` on a result; every fixture rebuilt for the new policy pin.

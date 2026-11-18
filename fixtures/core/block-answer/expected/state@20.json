@@ -158,10 +158,10 @@
     "hive": "fixture",
     "mode": "authoritative",
     "policy": {
-      "commit_oid": "sha1:0da4b4820f1a0e29c47835094d95b4dac5d5445c",
-      "content_digest": "sha256:d90ebedae03d923651e3948a85d12676b87f1639df20e944c2d7e0b5c8b33e7d",
+      "commit_oid": "sha1:374046fa83d1a5fd32f7824ad4fe9ad2bdfdad2f",
+      "content_digest": "sha256:78503bfbbe662a732a37dfaf113a7b2b67237e0f6f8bfc0ebca5f376e7762afc",
       "kind": "tree",
-      "object_oid": "sha1:263e7c71755c59bb1527c282f46c4f7786de6e2f",
+      "object_oid": "sha1:b17b55a5be289494a84c6cb3bba8c83c11380c48",
       "path": "policy",
       "repository": "fixture",
       "version": 1
@@ -196,7 +196,7 @@
       },
       "latest_review": null,
       "order": {
-        "commit_oid": "sha1:0da4b4820f1a0e29c47835094d95b4dac5d5445c",
+        "commit_oid": "sha1:374046fa83d1a5fd32f7824ad4fe9ad2bdfdad2f",
         "content_digest": "sha256:b2dde536a6f1aa0dbf24160f57dcabb606df084e9493a948b3e452eda3535132",
         "kind": "file",
         "mode": "100644",

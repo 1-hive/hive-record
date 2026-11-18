@@ -118,14 +118,14 @@
       "source_commit": "0000000000000000000000000000000000000000",
       "version": "fixture"
     },
-    "head": 28,
+    "head": 32,
     "hive": "fixture",
     "mode": "authoritative",
     "policy": {
-      "commit_oid": "sha1:0da4b4820f1a0e29c47835094d95b4dac5d5445c",
-      "content_digest": "sha256:d90ebedae03d923651e3948a85d12676b87f1639df20e944c2d7e0b5c8b33e7d",
+      "commit_oid": "sha1:374046fa83d1a5fd32f7824ad4fe9ad2bdfdad2f",
+      "content_digest": "sha256:78503bfbbe662a732a37dfaf113a7b2b67237e0f6f8bfc0ebca5f376e7762afc",
       "kind": "tree",
-      "object_oid": "sha1:263e7c71755c59bb1527c282f46c4f7786de6e2f",
+      "object_oid": "sha1:b17b55a5be289494a84c6cb3bba8c83c11380c48",
       "path": "policy",
       "repository": "fixture",
       "version": 1
@@ -145,11 +145,11 @@
   "proposals": {
     "pr1": {
       "approver_class": "chief_of_staff",
-      "decided_at": "2026-09-01T12:25:00.000000Z",
+      "decided_at": "2026-09-01T12:29:00.000000Z",
       "decided_by": "cos",
       "id": "pr1",
       "proposed": {
-        "basis": 24,
+        "basis": 28,
         "data": {
           "project": "p1",
           "title": "Split out the parser"
@@ -158,7 +158,7 @@
         "refs": [
           {
             "pin": {
-              "commit_oid": "sha1:0da4b4820f1a0e29c47835094d95b4dac5d5445c",
+              "commit_oid": "sha1:374046fa83d1a5fd32f7824ad4fe9ad2bdfdad2f",
               "content_digest": "sha256:0feb5a0846f86edf9a6dd43c5af85bcd9f174f14c99fdd599d52c8cd67dd7f53",
               "kind": "file",
               "mode": "100644",
@@ -177,8 +177,8 @@
       "rationale": null,
       "reason": null,
       "status": "approved",
-      "status_since": 26,
-      "submitted_at": "2026-09-01T12:24:00.000000Z"
+      "status_since": 30,
+      "submitted_at": "2026-09-01T12:28:00.000000Z"
     }
   },
   "tasks": {
@@ -189,11 +189,11 @@
       "created_at": "2026-09-01T12:09:00.000000Z",
       "created_by": "cos",
       "current_result": {
-        "at": "2026-09-01T12:15:00.000000Z",
+        "at": "2026-09-01T12:19:00.000000Z",
         "author": "w1",
-        "event_id": "01a05ce4-e5a0-7d9b-9521-f387af19922a",
+        "event_id": "01a05ce8-8f20-7345-a35c-8c41f77383c1",
         "pin": {
-          "commit_oid": "sha1:0da4b4820f1a0e29c47835094d95b4dac5d5445c",
+          "commit_oid": "sha1:374046fa83d1a5fd32f7824ad4fe9ad2bdfdad2f",
           "content_digest": "sha256:a7cd6668b2f53361ac83fff727e4e8ae11b6f8bebc08f324b6e974fdf5a82d98",
           "kind": "file",
           "mode": "100644",
@@ -202,7 +202,7 @@
           "repository": "fixture",
           "version": 1
         },
-        "position": 16
+        "position": 20
       },
       "exceptions_applied": 0,
       "ext": {
@@ -226,14 +226,14 @@
       "goal": null,
       "id": "t1",
       "last_activity": {
-        "at": "2026-09-01T12:15:00.000000Z",
-        "position": 16
+        "at": "2026-09-01T12:19:00.000000Z",
+        "position": 20
       },
       "latest_review": {
-        "event_id": "01a05ce6-ba60-75a9-943c-91156f25e2a2",
-        "position": 18,
+        "event_id": "01a05cea-63e0-7857-83fc-638042af9fc3",
+        "position": 22,
         "review_pin": {
-          "commit_oid": "sha1:0da4b4820f1a0e29c47835094d95b4dac5d5445c",
+          "commit_oid": "sha1:374046fa83d1a5fd32f7824ad4fe9ad2bdfdad2f",
           "content_digest": "sha256:d83a3016607851656eb03e37796c636b745b99b4435b564bbe88c421c4d2bc8c",
           "kind": "file",
           "mode": "100644",
@@ -246,7 +246,7 @@
         "verdict": "passed"
       },
       "order": {
-        "commit_oid": "sha1:0da4b4820f1a0e29c47835094d95b4dac5d5445c",
+        "commit_oid": "sha1:374046fa83d1a5fd32f7824ad4fe9ad2bdfdad2f",
         "content_digest": "sha256:b2dde536a6f1aa0dbf24160f57dcabb606df084e9493a948b3e452eda3535132",
         "kind": "file",
         "mode": "100644",
@@ -260,17 +260,17 @@
       "reassignments": 0,
       "results_count": 1,
       "reviews_failed_count": 0,
-      "revision": 9,
+      "revision": 12,
       "status": "done",
-      "status_since": 19,
+      "status_since": 23,
       "title": "Build it",
       "violations": 0
     },
     "t2": {
-      "assigned_at": "2026-09-01T12:21:00.000000Z",
+      "assigned_at": "2026-09-01T12:25:00.000000Z",
       "assigned_reviewer": null,
       "block": null,
-      "created_at": "2026-09-01T12:19:00.000000Z",
+      "created_at": "2026-09-01T12:23:00.000000Z",
       "created_by": "cos",
       "current_result": null,
       "exceptions_applied": 0,
@@ -294,12 +294,12 @@
       "goal": null,
       "id": "t2",
       "last_activity": {
-        "at": "2026-09-01T12:19:00.000000Z",
-        "position": 20
+        "at": "2026-09-01T12:23:00.000000Z",
+        "position": 24
       },
       "latest_review": null,
       "order": {
-        "commit_oid": "sha1:0da4b4820f1a0e29c47835094d95b4dac5d5445c",
+        "commit_oid": "sha1:374046fa83d1a5fd32f7824ad4fe9ad2bdfdad2f",
         "content_digest": "sha256:1d73910e1c13e4addef8e58a4718e104b02e82c475ec1c299eb6f835351c5e49",
         "kind": "file",
         "mode": "100644",
@@ -315,7 +315,7 @@
       "reviews_failed_count": 0,
       "revision": 6,
       "status": "cancelled",
-      "status_since": 28,
+      "status_since": 32,
       "title": "Next",
       "violations": 0
     },
@@ -323,7 +323,7 @@
       "assigned_at": null,
       "assigned_reviewer": null,
       "block": null,
-      "created_at": "2026-09-01T12:25:00.000000Z",
+      "created_at": "2026-09-01T12:29:00.000000Z",
       "created_by": "cos",
       "current_result": null,
       "exceptions_applied": 0,
@@ -344,12 +344,12 @@
       "goal": null,
       "id": "t3",
       "last_activity": {
-        "at": "2026-09-01T12:25:00.000000Z",
-        "position": 27
+        "at": "2026-09-01T12:29:00.000000Z",
+        "position": 31
       },
       "latest_review": null,
       "order": {
-        "commit_oid": "sha1:0da4b4820f1a0e29c47835094d95b4dac5d5445c",
+        "commit_oid": "sha1:374046fa83d1a5fd32f7824ad4fe9ad2bdfdad2f",
         "content_digest": "sha256:0feb5a0846f86edf9a6dd43c5af85bcd9f174f14c99fdd599d52c8cd67dd7f53",
         "kind": "file",
         "mode": "100644",
@@ -365,7 +365,7 @@
       "reviews_failed_count": 0,
       "revision": 1,
       "status": "created",
-      "status_since": 27,
+      "status_since": 31,
       "title": "Split out the parser",
       "violations": 0
     }

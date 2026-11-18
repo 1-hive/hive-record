@@ -12,7 +12,7 @@
 {"http":201,"positions":[12],"status":"accepted"}
 {"http":201,"positions":[13],"status":"accepted"}
 {"http":201,"positions":[14],"status":"accepted"}
-{"http":201,"positions":[15],"status":"accepted"}
+{"code":"SCHEMA_INVALID","http":422,"positions":[15],"status":"refused"}
 {"http":201,"positions":[16],"status":"accepted"}
 {"http":201,"positions":[17],"status":"accepted"}
 {"http":201,"positions":[18],"status":"accepted"}
@@ -23,5 +23,9 @@
 {"http":201,"positions":[23],"status":"accepted"}
 {"http":201,"positions":[24],"status":"accepted"}
 {"http":201,"positions":[25],"status":"accepted"}
-{"http":201,"positions":[26,27],"status":"accepted"}
+{"http":201,"positions":[26],"status":"accepted"}
+{"http":201,"positions":[27],"status":"accepted"}
 {"http":201,"positions":[28],"status":"accepted"}
+{"http":201,"positions":[29],"status":"accepted"}
+{"http":201,"positions":[30,31],"status":"accepted"}
+{"http":201,"positions":[32],"status":"accepted"}

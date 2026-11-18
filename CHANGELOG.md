@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.5.0] — 2026-11-18
+
+Amendment A7 (SPEC §24.6, §28, Appendix D): `task.blocked`, `task.reported`, `task.result_posted` and `review.recorded` take an optional `ext.model`, the model that wrote the event's content as the actor's harness reported it, in the `1-hive` profile 1.2.0 and the `proto-hive` profile 1.1.0. Recorded, never used to decide. No code change; fixtures `proto-hive/happy-path` and `1-hive/goal-happy-path` carry it; every fixture rebuilt for the new policy pin.
+
 ## [1.4.0] — 2026-10-20
 
 Amendment A6 (SPEC Part III, Appendix D): the `proto-hive` profile 1.0.0, `1-hive` without goals, for hives whose work is assigned only through a chief of staff. No code change; fixture `proto-hive/happy-path`; every fixture rebuilt for the new policy pin.

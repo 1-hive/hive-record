@@ -1,7 +1,7 @@
 {
  "schema": "hive.profile/1",
  "name": "proto-hive",
- "version": "1.0.0",
+ "version": "1.1.0",
  "extends": "core@1",
  "add_classes": [
   "chief_of_staff",

@@ -1,0 +1,14 @@
+{
+  "$id": "https://github.com/1-hive/hive-record/policy/profiles/1-hive/schemas/ext/task.blocked.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "A7: the model that wrote this event's content, as the actor's harness reported it; absent when unknown."
+    }
+  }
+}

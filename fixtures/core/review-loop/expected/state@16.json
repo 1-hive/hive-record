@@ -158,10 +158,10 @@
     "hive": "fixture",
     "mode": "authoritative",
     "policy": {
-      "commit_oid": "sha1:0da4b4820f1a0e29c47835094d95b4dac5d5445c",
-      "content_digest": "sha256:d90ebedae03d923651e3948a85d12676b87f1639df20e944c2d7e0b5c8b33e7d",
+      "commit_oid": "sha1:374046fa83d1a5fd32f7824ad4fe9ad2bdfdad2f",
+      "content_digest": "sha256:78503bfbbe662a732a37dfaf113a7b2b67237e0f6f8bfc0ebca5f376e7762afc",
       "kind": "tree",
-      "object_oid": "sha1:263e7c71755c59bb1527c282f46c4f7786de6e2f",
+      "object_oid": "sha1:b17b55a5be289494a84c6cb3bba8c83c11380c48",
       "path": "policy",
       "repository": "fixture",
       "version": 1
@@ -190,7 +190,7 @@
         "author": "w1",
         "event_id": "01a05ce3-10e0-7259-8652-237b4f65d4d9",
         "pin": {
-          "commit_oid": "sha1:0da4b4820f1a0e29c47835094d95b4dac5d5445c",
+          "commit_oid": "sha1:374046fa83d1a5fd32f7824ad4fe9ad2bdfdad2f",
           "content_digest": "sha256:a7cd6668b2f53361ac83fff727e4e8ae11b6f8bebc08f324b6e974fdf5a82d98",
           "kind": "file",
           "mode": "100644",
@@ -213,7 +213,7 @@
         "event_id": "01a05ce4-e5a0-7d9b-9521-f387af19922a",
         "position": 16,
         "review_pin": {
-          "commit_oid": "sha1:0da4b4820f1a0e29c47835094d95b4dac5d5445c",
+          "commit_oid": "sha1:374046fa83d1a5fd32f7824ad4fe9ad2bdfdad2f",
           "content_digest": "sha256:d83a3016607851656eb03e37796c636b745b99b4435b564bbe88c421c4d2bc8c",
           "kind": "file",
           "mode": "100644",
@@ -226,7 +226,7 @@
         "verdict": "failed"
       },
       "order": {
-        "commit_oid": "sha1:0da4b4820f1a0e29c47835094d95b4dac5d5445c",
+        "commit_oid": "sha1:374046fa83d1a5fd32f7824ad4fe9ad2bdfdad2f",
         "content_digest": "sha256:b2dde536a6f1aa0dbf24160f57dcabb606df084e9493a948b3e452eda3535132",
         "kind": "file",
         "mode": "100644",

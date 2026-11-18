@@ -660,7 +660,8 @@ def goal_happy_path(fx: FixtureRepo) -> Scenario:
     s.req("w1", "task.reported", task="t1", data={"kind": "checkpoint", "ext": {"cost": {"usd_micros": 150_000, "tokens": 12_000}}},
           refs=[("report", "report-1")])
     s.req("w1", "task.result_posted", task="t1", refs=[("result", "result-1")],
-          data={"ext": {"cost": {"usd_micros": 50_000, "tokens": 3_000, "wall_clock_seconds": 600}}})
+          data={"ext": {"cost": {"usd_micros": 50_000, "tokens": 3_000, "wall_clock_seconds": 600},
+                        "model": "claude-opus-5-5"}})                           # A7
     # an independent review task
     s.req("cos", "task.created", task="rt1", goal="g1",
           data={"title": "Review t1", "project": "p1", "ext": {"kind": "review", "reviews_task": "t1"}},
@@ -740,7 +741,8 @@ def proto_setup(s: Scenario) -> None:
 
 def proto_happy_path(fx: FixtureRepo) -> Scenario:
     """The proto-hive profile: 1-hive's leases, supervision, cost and proposals, with no goals; a task's
-    order carries its goal, and the chief of staff cites the chat message it came from (A5)."""
+    order carries its goal, and the chief of staff cites the chat message it came from (A5); questions, reports,
+    results and reviews name the model that wrote them (A7)."""
     s = Scenario(fx, profile="proto-hive")
     proto_setup(s)
     s.req("cos", "task.created", task="t1", goal="g1", data={"title": "Build it", "project": "p1"},
@@ -752,14 +754,23 @@ def proto_happy_path(fx: FixtureRepo) -> Scenario:
     s.req("w1", "task.accepted", task="t1", fields={"cause": {"event": s.last_id()}})
     s.snapshot()
     s.req("sup", "task.nudged", task="t1", data={"reason": "no check-in for 40 minutes"})
-    s.req("w1", "task.reported", task="t1", data={"kind": "checkpoint", "ext": {"cost": {"usd_micros": 150_000, "tokens": 12_000}}},
-          refs=[("report", "report-1")])
+    # A7: the model that wrote a question, report, result or review; an empty one is refused
+    ask = {"needs": "decision", "reason": "Which API?"}
+    s.req("w1", "task.blocked", task="t1", data={**ask, "ext": {"model": ""}}, refs=[("question", "question-1")],
+          expect="SCHEMA_INVALID")
+    s.req("w1", "task.blocked", task="t1", data={**ask, "ext": {"model": "claude-opus-5-5"}},
+          refs=[("question", "question-1")])
+    s.req("cos", "task.answered", task="t1", data={"note": "Use v2"}, refs=[("answer", "answer-1")])
+    s.req("w1", "task.unblocked", task="t1")
+    s.req("w1", "task.reported", task="t1", data={"kind": "checkpoint", "ext": {"cost": {"usd_micros": 150_000, "tokens": 12_000},
+          "model": "claude-opus-5-5"}}, refs=[("report", "report-1")])
     s.req("w1", "task.result_posted", task="t1", refs=[("result", "result-1")],
-          data={"ext": {"cost": {"usd_micros": 50_000, "tokens": 3_000, "wall_clock_seconds": 600}}})
+          data={"ext": {"cost": {"usd_micros": 50_000, "tokens": 3_000, "wall_clock_seconds": 600},
+                        "model": "anthropic/claude-sonnet-5-5"}})
     s.req("cos", "review.assigned", task="t1", data={"reviewer": "rv1", "result_event": s.result_event("t1")},
           fields={"cause": {"event": s.last_id()}})
     s.req("rv1", "review.recorded", task="t1", data={"verdict": "passed", "result_event": s.result_event("t1"),
-          "ext": {"cost": {"usd_micros": 20_000, "tokens": 2_000}}}, refs=[("review", "review-1")])
+          "ext": {"cost": {"usd_micros": 20_000, "tokens": 2_000}, "model": "gpt-5.5"}}, refs=[("review", "review-1")])
     s.snapshot()
     s.req("cos", "task.closed", task="t1", rev=s.task("t1")["revision"], fields={"cause": {"event": s.last_id()}})
     # supervision and proposals work without a goal
