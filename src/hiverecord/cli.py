@@ -122,9 +122,65 @@ def cmd_gateway(args) -> None:
         uvicorn.run(gw.app(), host=args.host, port=args.port, log_level="info")
 
 
+# A7: the event types that may carry ext.model, and the first profile version of each that takes it.
+MODEL_TYPES = ("task.blocked", "task.reported", "task.result_posted", "review.recorded")
+MODEL_SINCE = {"1-hive": (1, 2, 0), "proto-hive": (1, 1, 0)}
+
+
+def stream_model(path: str, tail: int = 4 << 20) -> str | None:
+    """The model of the last assistant message in a JSON-lines stream of an agent's model messages (Claude Code's
+    `--output-format stream-json`): the one that ran this command, since a harness writes a message before it runs
+    the tools the message calls. None when the file is missing or names no model."""
+    try:
+        with open(path, "rb") as f:
+            f.seek(0, 2)
+            f.seek(max(0, f.tell() - tail))
+            lines = f.read().decode("utf-8", "replace").splitlines()
+    except OSError:
+        return None
+    for line in reversed(lines):
+        if '"assistant"' not in line:
+            continue
+        try:
+            d = json.loads(line)
+        except ValueError:
+            continue
+        m = (d.get("message") or {}).get("model") if isinstance(d, dict) and d.get("type") == "assistant" else None
+        if isinstance(m, str) and m.strip() and m.strip() != "<synthetic>":
+            return m.strip()[:100]
+    return None
+
+
+def emit_model(args) -> str | None:
+    """The model that wrote this event (A7): --model; else HIVE_MODEL_STREAM's last assistant message; else
+    HIVE_MODEL, the model the agent's harness was started with. None when none says, or --model is empty."""
+    if args.model is not None:
+        return args.model.strip()[:100] or None
+    path = os.environ.get("HIVE_MODEL_STREAM")
+    m = stream_model(path) if path else None
+    return m or (os.environ.get("HIVE_MODEL") or "").strip()[:100] or None
+
+
+def takes_model(c, type_: str) -> bool:
+    """Whether the hive's profile takes ext.model on this type (A7), from the gateway's health."""
+    if type_ not in MODEL_TYPES:
+        return False
+    try:
+        h = c.health()
+        since = MODEL_SINCE.get(h.get("profile") or "")
+        return bool(since) and tuple(int(x) for x in str(h.get("policy_version")).split(".")) >= since
+    except Exception:
+        return False
+
+
 def cmd_emit(args) -> None:
     c = _client(args)
     data = json.loads(args.data) if args.data else {}
+    ext = data.get("ext") if isinstance(data.get("ext"), dict) else None
+    if not (ext and "model" in ext):
+        model = emit_model(args)
+        if model and takes_model(c, args.type):
+            data["ext"] = {**(ext or {}), "model": model}
     refs = []
     for r in args.ref or []:
         rel, _, pin = r.partition("=")
@@ -307,6 +363,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--idempotency-key")
     s.add_argument("--cause-event", metavar="EVENT_ID", help="the event this one responds to (SPEC §17.5)")
     s.add_argument("--cause-external", metavar="REF", help="what outside the record caused it, e.g. telegram:<chat>/<msg>")
+    s.add_argument("--model", help="the model that wrote this question, report, result or review (A7; default: "
+                   "HIVE_MODEL_STREAM's last assistant message, else HIVE_MODEL; empty: none)")
     s.set_defaults(fn=cmd_emit)
 
     s = sub.add_parser("events", help="list or follow events")

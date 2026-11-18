@@ -92,14 +92,27 @@ def test_operator_walkthrough(pg, fx, tmp_path):
              "--data", '{"title":"Build","project":"p1"}')
         hive("cos", "emit", "task.assigned", "--task", "t1", "--data", json.dumps({"to": "w1", "ext": lease}))
         hive("w1", "emit", "task.accepted", "--task", "t1")
+        # A7: the result names the model of the stream's last assistant message, the review HIVE_MODEL's
+        stream = tmp_path / "worker-1.jsonl"
+        stream.write_text("\n".join(json.dumps(x) for x in (
+            {"type": "system", "subtype": "init", "model": "claude-opus-5-5"},
+            {"type": "assistant", "message": {"model": "claude-opus-5-5", "content": []}},
+            {"type": "assistant", "parent_tool_use_id": None, "message": {"model": "claude-sonnet-5-5", "content": []}},
+            {"type": "user", "message": {"content": []}})) + "\n")
+        env["HIVE_MODEL_STREAM"] = str(stream)
         ev = json.loads(hive("w1", "emit", "task.result_posted", "--task", "t1",
                              "--ref", f"result={pins['result-1']}").stdout)
+        del env["HIVE_MODEL_STREAM"]
+        assert ev["data"]["ext"]["model"] == "claude-sonnet-5-5", ev
         closed = hive("cos", "emit", "task.closed", "--task", "t1", check=False)
         assert "REVIEW_REQUIRED" in closed.stdout
         hive("cos", "emit", "review.assigned", "--task", "t1",
              "--data", json.dumps({"reviewer": "rv1", "result_event": ev["event_id"]}))
-        hive("rv1", "emit", "review.recorded", "--task", "t1", "--ref", f"review={pins['review-1']}",
-             "--data", json.dumps({"verdict": "passed", "result_event": ev["event_id"]}))
+        env["HIVE_MODEL"] = "gpt-5.5"
+        rv = json.loads(hive("rv1", "emit", "review.recorded", "--task", "t1", "--ref", f"review={pins['review-1']}",
+                             "--data", json.dumps({"verdict": "passed", "result_event": ev["event_id"]})).stdout)
+        assert rv["data"]["ext"]["model"] == "gpt-5.5", rv
+        del env["HIVE_MODEL"]
         assert "review:passed" in hive("cos", "board").stdout
         hive("cos", "emit", "task.closed", "--task", "t1")
         hive("cos", "emit", "goal.completed", "--goal", "g1", "--ref", f"summary={pins['summary-1']}",

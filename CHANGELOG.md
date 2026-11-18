@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.5.1] — 2026-11-18
+
+`hive emit` names the model that wrote a question, report, result or review (A7) when the hive's profile takes it (`1-hive` ≥ 1.2.0, `proto-hive` ≥ 1.1.0, from the gateway's health; never sent to an older one): `--model`; else the last assistant message in `HIVE_MODEL_STREAM`, a JSON-lines log of the agent's model messages in Claude Code's `stream-json` format (a harness writes a message before it runs the commands it calls, so that is the message that ran `hive emit`); else `HIVE_MODEL`, the model the agent's harness was started with. Nothing when none says; `--model ""` sends none; an `ext.model` given in `--data` is kept. Tests in `test_cli.py` and `test_cli_offline.py`.
+
 ## [1.5.0] — 2026-11-18
 
 Amendment A7 (SPEC §24.6, §28, Appendix D): `task.blocked`, `task.reported`, `task.result_posted` and `review.recorded` take an optional `ext.model`, the model that wrote the event's content as the actor's harness reported it, in the `1-hive` profile 1.2.0 and the `proto-hive` profile 1.1.0. Recorded, never used to decide. No code change; fixtures `proto-hive/happy-path` and `1-hive/goal-happy-path` carry it; every fixture rebuilt for the new policy pin.
